@@ -44,7 +44,22 @@ export const config = convict({
   serviceName: {
     doc: 'Applications Service Name',
     format: String,
-    default: 'rpa-guidance-prototype'
+    default: 'Rural Payments Agency guidance'
+  },
+  auth: {
+    enabled: {
+      doc: 'Whether the prototype password gate is enabled. Disable locally with USE_AUTH=false.',
+      format: Boolean,
+      default: true,
+      env: 'USE_AUTH'
+    },
+    password: {
+      doc: 'Prototype access password. Set as a CDP secret. The gate denies access until this is set.',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'PASSWORD'
+    }
   },
   root: {
     doc: 'Project root',

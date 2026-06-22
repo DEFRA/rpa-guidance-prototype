@@ -1,0 +1,79 @@
+@use 'govuk-frontend' as *;
+@use '../variables/colours' as colours;
+
+// The split markdown editor: a plain textarea on the left, a live preview on
+// the right. The two panes are equal width and equal height (like an online
+// markdown editor), so a change on the left lines up with the preview on the
+// right. They stack on small screens.
+
+.app-editor__panes {
+  @include govuk-media-query($from: tablet) {
+    display: flex;
+    gap: govuk-spacing(4);
+  }
+}
+
+.app-editor__pane {
+  margin-bottom: govuk-spacing(4);
+
+  @include govuk-media-query($from: tablet) {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+}
+
+.app-editor__input {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  font-size: 16px;
+  line-height: 1.45;
+  height: 32rem;
+  resize: vertical;
+}
+
+.app-markdown-preview {
+  height: 32rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: govuk-spacing(3);
+  border: 1px solid colours.$govuk-mid-grey;
+  background-color: govuk-colour('white');
+  overflow-wrap: break-word;
+
+  // The rendered guidance already carries GOV.UK spacing; just tidy the edges
+  // so the panel does not gain a double margin at the top or bottom.
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// The review page shows the guidance as a document panel that echoes the edit
+// preview, so it reads as the artefact under review and not as page text. Same
+// styling as the preview, but full height so it can be read in one go.
+.app-rich-text {
+  padding: govuk-spacing(3);
+  border: 1px solid colours.$govuk-mid-grey;
+  background-color: govuk-colour('white');
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Inline code, used in the preview and the "how to format" help.
+.app-code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  font-size: 0.875em;
+  padding: 0 govuk-spacing(1);
+  background-color: colours.$govuk-light-grey;
+}

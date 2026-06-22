@@ -1,0 +1,31 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">{{ option.scheme }}</span>
+      <h1 class="govuk-heading-l">{{ option.title }}</h1>
+      <p class="govuk-body-l">{{ option.summary }}</p>
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Scheme" }, value: { text: option.scheme } },
+          { key: { text: "Pays for" }, value: { text: option.paysFor } },
+          { key: { text: "Deadline" }, value: { text: option.deadline } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-m">What to do next</h2>
+      <p class="govuk-body">Read the full guidance on GOV.UK to check the eligibility rules and how to apply. The details here are a summary, so always check GOV.UK for the current rules.</p>
+
+      {{ govukButton({ text: "Read the guidance on GOV.UK", href: option.url }) }}
+
+      <p class="govuk-body">
+        <a class="govuk-link" href="/find-funding/results">Back to funding options</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

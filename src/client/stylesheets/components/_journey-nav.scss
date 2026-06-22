@@ -1,0 +1,18 @@
+@use 'govuk-frontend' as *;
+@use '../variables/colours' as colours;
+
+// A list of journeys with a thin rule above each item and below the last,
+// matching the AI playbook's section-list pattern. Each item is a heading link
+// with a single line of description.
+.app-journey-nav {
+  margin-top: govuk-spacing(4);
+  margin-bottom: govuk-spacing(6);
+  border-bottom: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-journey-nav__item {
+  margin-bottom: 0;
+  padding-top: govuk-spacing(3);
+  padding-bottom: govuk-spacing(3);
+  border-top: 1px solid colours.$govuk-mid-grey;
+}

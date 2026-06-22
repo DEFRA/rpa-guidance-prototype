@@ -1,0 +1,35 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if error %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: error, href: "#password" }]
+        }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">This is a prototype</h1>
+      <p class="govuk-body">It is used for testing and research, so some details are not real. Enter the password to continue.</p>
+
+      <form method="post" action="/password" novalidate>
+        <input type="hidden" name="returnTo" value="{{ returnTo }}">
+
+        {{ govukInput({
+          id: "password",
+          name: "password",
+          type: "password",
+          label: { text: "Password" },
+          errorMessage: { text: error } if error
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

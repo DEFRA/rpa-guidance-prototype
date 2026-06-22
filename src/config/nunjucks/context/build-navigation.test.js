@@ -16,8 +16,18 @@ describe('#buildNavigation', () => {
       },
       {
         current: false,
-        text: 'About',
-        href: '/about'
+        text: 'Make and publish guidance',
+        href: '/guidance/start'
+      },
+      {
+        current: false,
+        text: 'Find and use guidance',
+        href: '/demand/sign-in'
+      },
+      {
+        current: false,
+        text: 'Find funding',
+        href: '/find-funding/start'
       }
     ])
   })
@@ -31,8 +41,18 @@ describe('#buildNavigation', () => {
       },
       {
         current: false,
-        text: 'About',
-        href: '/about'
+        text: 'Make and publish guidance',
+        href: '/guidance/start'
+      },
+      {
+        current: false,
+        text: 'Find and use guidance',
+        href: '/demand/sign-in'
+      },
+      {
+        current: false,
+        text: 'Find funding',
+        href: '/find-funding/start'
       }
     ])
   })

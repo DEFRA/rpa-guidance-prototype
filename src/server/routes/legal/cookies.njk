@@ -1,0 +1,31 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Cookies</h1>
+
+      <p class="govuk-body">Cookies are small files saved on your device. This prototype uses one essential cookie to remember your progress as you click through it.</p>
+
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">Essential cookie</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Name</th>
+            <th scope="col" class="govuk-table__header">Purpose</th>
+            <th scope="col" class="govuk-table__header">Expires</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">session</td>
+            <td class="govuk-table__cell">Keeps the journey working as you move between pages</td>
+            <td class="govuk-table__cell">When you close the browser</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="govuk-body">This is a prototype for testing ideas, so it does not use any analytics or marketing cookies.</p>
+    </div>
+  </div>
+{% endblock %}

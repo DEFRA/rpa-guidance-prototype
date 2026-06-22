@@ -1,0 +1,75 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <p class="govuk-!-margin-bottom-2">{{ govukTag({ text: "Experimental", classes: "govuk-tag--yellow" }) }}</p>
+      <h1 class="govuk-heading-l">Find and use guidance</h1>
+
+      {# ── Use the answer: copy and print (revealed when JS runs) ──────── #}
+      <div class="govuk-button-group">
+        <button class="govuk-button govuk-button--secondary" type="button" data-module="app-copy-button" hidden>Copy answer</button>
+        <button class="govuk-button govuk-button--secondary" type="button" data-module="app-print-button" hidden>Print</button>
+      </div>
+
+      {# ── Conversation ────────────────────────────────────────────────── #}
+      {% for msg in thread %}
+        {% if msg.role == 'user' %}
+          <div class="app-chat-message app-chat-message--user">
+            <p class="app-chat-message__role">You asked</p>
+            <div class="app-chat-message__bubble">
+              <p class="govuk-body">{{ msg.text }}</p>
+            </div>
+          </div>
+        {% else %}
+          <div class="app-chat-message app-chat-message--assistant"{% if loop.last %} id="latest-answer" tabindex="-1"{% endif %}>
+            <p class="app-chat-message__role">Guidance assistant</p>
+            <div class="app-chat-message__bubble">
+              <p class="govuk-body">{{ msg.answer }}</p>
+
+              {% if msg.sources | length %}
+                <h2 class="govuk-heading-s govuk-!-margin-top-4 govuk-!-margin-bottom-2">Check this answer</h2>
+                <ul class="govuk-list">
+                  {% for source in msg.sources %}
+                    <li class="app-source">
+                      <a class="govuk-link govuk-!-font-weight-bold" href="{{ source.url }}">{{ source.title }}</a>
+                      <p class="app-source__summary">{{ source.summary }}</p>
+                      <p class="govuk-body-s govuk-!-margin-bottom-0">{{ source.scheme }}</p>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              <p class="govuk-hint govuk-!-margin-top-3 govuk-!-margin-bottom-0">This answer may be inaccurate. Check the sources before you rely on it.</p>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <p class="govuk-body govuk-!-margin-top-4">Finished with this query? <a class="govuk-link" href="/demand/log">Log this call and finish</a>.</p>
+
+      {# ── Sticky follow-on input ──────────────────────────────────────── #}
+      <div class="app-chat-input">
+        <p class="govuk-hint govuk-!-margin-bottom-2">Do not enter personal information.</p>
+        <form action="/demand/answer" method="post" novalidate>
+          {{ govukInput({
+            id: "q",
+            name: "q",
+            label: { text: "Ask a follow-on question", classes: "govuk-visually-hidden" },
+            attributes: { placeholder: "Ask a follow-on question..." }
+          }) }}
+          <div class="govuk-button-group">
+            {{ govukButton({ text: "Send" }) }}
+          </div>
+        </form>
+        <p class="govuk-body govuk-!-margin-top-2"><a class="govuk-link" href="/demand/ask">Ask a new question</a></p>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

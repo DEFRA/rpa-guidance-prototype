@@ -1,0 +1,71 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorList | length %}
+        {{ govukErrorSummary({ titleText: "There is a problem", errorList: errorList }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">Log this call</h1>
+      <p class="govuk-body">Record the outcome so the team can see how customer queries are resolved.</p>
+
+      <form method="post" action="/demand/log" novalidate>
+
+        {{ govukRadios({
+          name: "outcome",
+          idPrefix: "outcome",
+          fieldset: { legend: { text: "How did the call end?", classes: "govuk-fieldset__legend--m" } },
+          errorMessage: { text: errors.outcome } if errors.outcome,
+          items: [
+            { value: "resolved", text: "Resolved on this call", checked: values.outcome == "resolved" },
+            { value: "transferred", text: "Transferred to a specialist", checked: values.outcome == "transferred" },
+            { value: "follow-up", text: "Customer needs to follow up", checked: values.outcome == "follow-up" }
+          ]
+        }) }}
+
+        {{ govukRadios({
+          name: "queryType",
+          idPrefix: "queryType",
+          fieldset: { legend: { text: "What was the query about?", classes: "govuk-fieldset__legend--m" } },
+          errorMessage: { text: errors.queryType } if errors.queryType,
+          items: [
+            { value: "funding", text: "Funding", checked: values.queryType == "funding" },
+            { value: "application", text: "Application", checked: values.queryType == "application" },
+            { value: "eligibility", text: "Eligibility", checked: values.queryType == "eligibility" },
+            { value: "documents", text: "Supporting documents", checked: values.queryType == "documents" },
+            { value: "other", text: "Something else", checked: values.queryType == "other" }
+          ]
+        }) }}
+
+        {{ govukRadios({
+          name: "helpful",
+          idPrefix: "helpful",
+          classes: "govuk-radios--inline",
+          fieldset: { legend: { text: "Was the assistant helpful? (optional)", classes: "govuk-fieldset__legend--m" } },
+          items: [
+            { value: "yes", text: "Yes", checked: values.helpful == "yes" },
+            { value: "no", text: "No", checked: values.helpful == "no" }
+          ]
+        }) }}
+
+        {{ govukInput({
+          id: "reference",
+          name: "reference",
+          label: { text: "Customer reference (optional)", classes: "govuk-label--m" },
+          hint: { text: "For example, the single business identifier (SBI)" },
+          value: values.reference
+        }) }}
+
+        {{ govukButton({ text: "Log call and finish" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

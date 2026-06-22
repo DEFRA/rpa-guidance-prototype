@@ -1,0 +1,59 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/task-list/macro.njk" import govukTaskList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+
+      {% if state == 'blocked' %}
+
+        <h1 class="govuk-heading-l">The pre-publish check found things to fix</h1>
+        <p class="govuk-body">An AI check reviewed the guidance against publishing standards. You must make {{ remaining }} essential {{ "fix" if remaining == 1 else "fixes" }} before you can publish.</p>
+
+        <h2 class="govuk-heading-m">Essential fixes</h2>
+        <p class="govuk-body">You cannot publish until these are fixed.</p>
+        {{ govukTaskList({ idPrefix: "issues-to-fix", items: mustFixItems }) }}
+
+        <form method="post" action="/guidance/check/fix-all" novalidate>
+          {{ govukButton({ text: "Mark all as fixed", classes: "govuk-button--secondary" }) }}
+        </form>
+
+        {% if considerItems | length %}
+          <h2 class="govuk-heading-m govuk-!-margin-top-4">Optional improvements</h2>
+          <p class="govuk-body">These do not block publishing. Make them if you can.</p>
+          {{ govukTaskList({ idPrefix: "improvements", items: considerItems }) }}
+        {% endif %}
+
+      {% else %}
+
+        <h1 class="govuk-heading-l">You have made the essential fixes</h1>
+        <p class="govuk-body">You can publish now, or make the optional improvements first.</p>
+
+        {% if considerItems | length %}
+          <h2 class="govuk-heading-m">Optional improvements</h2>
+          <p class="govuk-body">These do not block publishing.</p>
+          {{ govukTaskList({ idPrefix: "improvements", items: considerItems }) }}
+        {% endif %}
+
+        {% if mustFixItems | length %}
+          <details class="govuk-details">
+            <summary class="govuk-details__summary">
+              <span class="govuk-details__summary-text">Review the essential fixes you made</span>
+            </summary>
+            <div class="govuk-details__text">
+              {{ govukTaskList({ idPrefix: "made", items: mustFixItems }) }}
+            </div>
+          </details>
+        {% endif %}
+
+        {{ govukButton({ text: "Continue to publish", href: "/guidance/check/publish" }) }}
+
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}

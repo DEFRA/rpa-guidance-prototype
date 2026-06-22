@@ -1,0 +1,78 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+
+      {% if status == 'awaiting-review' %}
+
+        <h1 class="govuk-heading-l">Guidance sent for review</h1>
+        <p class="govuk-body">You have sent the guidance to the approver. You cannot edit it while it is with them.</p>
+        <h2 class="govuk-heading-m">What happens next</h2>
+        <p class="govuk-body">The approver checks the guidance against policy, then either approves it or sends it back with comments.</p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-section-break--l">
+        <h2 class="govuk-heading-s">Prototype controls</h2>
+        {{ govukInsetText({ text: "In the real service the approver is a different person. Simulate their decision here to continue the prototype." }) }}
+        <form method="post" action="/guidance/review" novalidate>
+          <div class="govuk-button-group">
+            {{ govukButton({ text: "Simulate: approver approves", name: "action", value: "approve", classes: "govuk-button--secondary" }) }}
+            {{ govukButton({ text: "Simulate: approver sends back for amends", name: "action", value: "amends", classes: "govuk-button--secondary" }) }}
+          </div>
+        </form>
+
+        <p class="govuk-body"><a class="govuk-link" href="/guidance/task-list">Return to the task list</a></p>
+
+      {% elif status == 'amends' %}
+
+        <h1 class="govuk-heading-l">The approver sent this back for amends</h1>
+        {{ govukInsetText({ text: "Comment from the approver: the eligibility section needs to reflect the latest cross-compliance rules." }) }}
+        <p class="govuk-body">Make the changes, then send it for review again.</p>
+        <div class="govuk-button-group">
+          {{ govukButton({ text: "Edit the guidance", href: "/guidance/edit" }) }}
+        </div>
+        <form method="post" action="/guidance/review" novalidate>
+          {{ govukButton({ text: "Send for review again", name: "action", value: "send", classes: "govuk-button--secondary" }) }}
+        </form>
+
+      {% elif status == 'done' %}
+
+        <h1 class="govuk-heading-l">The approver approved this guidance</h1>
+        <p class="govuk-body">Review and approval is complete. The next phase is readiness testing.</p>
+        <p class="govuk-body"><a class="govuk-link" href="/guidance/task-list">Return to the task list</a></p>
+
+      {% else %}
+
+        <h1 class="govuk-heading-l">Check your guidance is ready for review</h1>
+        <p class="govuk-body">You are sending this to the approver. Sense-check it against the standards below, then read it through as it will publish.</p>
+
+        <h2 class="govuk-heading-m">Before you send it, check that:</h2>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>it is accurate and reflects the latest policy</li>
+          <li>it covers everything the policy needs, with nothing missing</li>
+          <li>it is written in plain English</li>
+          <li>it meets accessibility standards</li>
+          <li>you have written the test scenarios for readiness testing</li>
+        </ul>
+
+        <h2 class="govuk-heading-m">Read it as it will publish</h2>
+        <p class="govuk-body">This is exactly how your guidance will appear on the Guidance Hub.</p>
+        <div class="app-rich-text govuk-!-margin-top-4">
+          {{ guideHtml | safe }}
+        </div>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-section-break--l">
+
+        <form method="post" action="/guidance/review" novalidate>
+          {{ govukButton({ text: "Send for review", name: "action", value: "send" }) }}
+        </form>
+        <p class="govuk-body"><a class="govuk-link" href="/guidance/edit">Go back and edit the guidance</a></p>
+
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

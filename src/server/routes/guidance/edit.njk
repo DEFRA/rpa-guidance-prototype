@@ -1,0 +1,63 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% set formatHelp %}
+  <ul class="govuk-list">
+    <li>Start a line with <code class="app-code">##</code> for a heading, or <code class="app-code">###</code> for a smaller heading</li>
+    <li>Wrap text in <code class="app-code">**two asterisks**</code> to make it bold</li>
+    <li>Start a line with <code class="app-code">-</code> for a bullet, or <code class="app-code">1.</code> for a numbered list</li>
+    <li>Write a link as <code class="app-code">[link text](https://www.gov.uk)</code></li>
+  </ul>
+{% endset %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <h1 class="govuk-heading-l">Edit the guidance</h1>
+      <p class="govuk-body">Edit the converted text on the left. The preview on the right shows how it will look once published.</p>
+    </div>
+  </div>
+
+  <form method="post" action="/guidance/edit" class="app-editor" data-module="app-markdown-editor" novalidate>
+    <div class="app-editor__panes">
+      <div class="app-editor__pane">
+        {{ govukTextarea({
+          id: "markdown",
+          name: "markdown",
+          rows: 22,
+          label: { text: "Markdown", classes: "govuk-label--m" },
+          classes: "app-editor__input",
+          spellcheck: true,
+          value: markdown
+        }) }}
+
+        {{ govukDetails({ summaryText: "How to format text", html: formatHelp }) }}
+      </div>
+
+      <div class="app-editor__pane">
+        <h2 class="govuk-heading-m" id="preview-heading">Preview</h2>
+        <div class="app-markdown-preview" data-module="app-markdown-preview" role="region" aria-labelledby="preview-heading">
+          {{ previewHtml | safe }}
+        </div>
+      </div>
+    </div>
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-button-group">
+          {{ govukButton({ text: "Save and continue", name: "action", value: "continue" }) }}
+          {{ govukButton({
+            text: "Update preview",
+            classes: "govuk-button--secondary",
+            name: "action",
+            value: "preview"
+          }) }}
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}

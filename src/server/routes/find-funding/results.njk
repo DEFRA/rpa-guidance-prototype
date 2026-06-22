@@ -1,0 +1,34 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Funding options</h1>
+
+      {% if options | length %}
+        <p class="govuk-body">{% if filtered %}These options match what you told us.{% else %}Here are the funding options.{% endif %} Check the full guidance on GOV.UK before you apply.</p>
+
+        {% for option in options %}
+          <div class="govuk-!-margin-bottom-5">
+            <h2 class="govuk-heading-m govuk-!-margin-bottom-1">
+              <a class="govuk-link" href="/find-funding/option/{{ option.id }}">{{ option.title }}</a>
+            </h2>
+            <p class="govuk-body govuk-!-margin-bottom-1">{{ option.summary }}</p>
+            <p class="govuk-body govuk-!-margin-bottom-0">
+              <strong class="govuk-tag {{ option.tagClass }}">{{ option.tagText }}</strong>
+              <span class="govuk-hint govuk-!-display-inline">{{ option.scheme }}</span>
+            </p>
+          </div>
+          {% if not loop.last %}
+            <hr class="govuk-section-break govuk-section-break--visible govuk-section-break--m">
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <p class="govuk-body">No funding options match what you selected.</p>
+        <p class="govuk-body"><a class="govuk-link" href="/find-funding/goals">Change what you want to do</a></p>
+      {% endif %}
+
+      <p class="govuk-body govuk-!-margin-top-6">Cannot find what you need? <a class="govuk-link" href="/find-funding/contact">Get more help</a>.</p>
+    </div>
+  </div>
+{% endblock %}
