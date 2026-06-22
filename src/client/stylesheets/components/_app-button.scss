@@ -1,0 +1,12 @@
+@use 'sass:color';
+@use '../variables/colours' as *;
+
+// Use the Defra brand green for primary and start buttons. The secondary,
+// warning and inverse variants keep their GOV.UK colours.
+.govuk-button:not(.govuk-button--secondary):not(.govuk-button--warning):not(.govuk-button--inverse) {
+  background-color: $defra-green;
+
+  &:hover {
+    background-color: color.adjust($defra-green, $lightness: -20%);
+  }
+}

@@ -1,12 +1,10 @@
 {% extends "govuk/template.njk" %}
 
-{# Import GOVUK components globally #}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
-{% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{# Import custom components globally #}
+{# Custom heading component, used by error/index.njk and available to pages #}
 {% from "heading/macro.njk" import appHeading %}
 
 {% set mainClasses = "app-main-wrapper" %}
@@ -24,19 +22,26 @@
 {% endblock %}
 
 {% block header %}
-  {# serviceName being used in govukHeader will be @deprecated in v6. It has moved to govukServiceNavigation - https://github.com/alphagov/govuk-frontend/blob/main/CHANGELOG.md#move-service-name-and-navigation-links-from-the-govuk-header-to-service-navigation-component #}
-  {{ govukHeader({
-    homepageUrl: "https://www.gov.uk/",
-    classes: "app-header",
-    containerClasses: "govuk-width-container",
-    serviceName: serviceName,
-    serviceUrl: serviceUrl,
-    useTudorCrown: true
-  }) }}
-
-  {{ govukServiceNavigation({
-    navigation: navigation
-  }) }}
+  <header class="defra-header" role="banner">
+    <div class="govuk-width-container">
+      <div class="defra-header__inner">
+        <a href="/" class="defra-header__service-name">
+          <span class="govuk-visually-hidden">Department for Environment, Food and Rural Affairs: </span>{{ serviceName }}
+        </a>
+      </div>
+    </div>
+  </header>
+  <nav class="defra-service-navigation" aria-label="Service navigation">
+    <div class="govuk-width-container">
+      <ul class="defra-service-navigation__list">
+        {% for item in navigation %}
+          <li class="defra-service-navigation__item">
+            <a class="defra-service-navigation__link" href="{{ item.href }}"{% if item.current %} aria-current="page"{% endif %}>{{ item.text }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </nav>
 {% endblock %}
 
 {% block pageTitle %}
@@ -63,25 +68,36 @@
 {% block content %}{% endblock %}
 
 {% block footer %}
-  {{ govukFooter({
-    meta: {
-      items: [
-        {
-          href: "https://www.gov.uk/help/privacy-notice",
-          text: "Privacy"
-        },
-        {
-          href: "/cookies",
-          text: "Cookies"
-        },
-        {
-          href: "/accessibility-statement",
-          text: "Accessibility statement"
-        }
-      ],
-      html: 'Maintained by the AI Capability and Enablement team at Defra. <a class="govuk-footer__link" href="mailto:AICapabilityAndEnablement@defra.gov.uk">Contact the team</a>.'
-    }
-  }) }}
+  <footer class="defra-footer" role="contentinfo">
+    <div class="govuk-width-container">
+      <div class="defra-footer__meta">
+        <div class="defra-footer__meta-item">
+          <ul class="defra-footer__inline-list">
+            <li class="defra-footer__inline-list-item">
+              <a class="defra-footer__link" href="https://www.gov.uk/help/privacy-notice">Privacy</a>
+            </li>
+            <li class="defra-footer__inline-list-item">
+              <a class="defra-footer__link" href="/cookies">Cookies</a>
+            </li>
+            <li class="defra-footer__inline-list-item">
+              <a class="defra-footer__link" href="/accessibility-statement">Accessibility statement</a>
+            </li>
+          </ul>
+        </div>
+        <div class="defra-footer__meta-item">
+          <span class="defra-footer__licence-description">
+            Maintained by the AI Capability and Enablement team at Defra. If you have a question or want to give feedback, <a class="defra-footer__link" href="mailto:AICapabilityAndEnablement@defra.gov.uk">get in touch</a>.
+          </span>
+        </div>
+        <div class="defra-footer__meta-item">
+          <span class="defra-footer__licence-description">
+            All content is available under the
+            <a class="defra-footer__link" href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license">Open Government Licence v3.0</a>, except where otherwise stated.
+          </span>
+        </div>
+      </div>
+    </div>
+  </footer>
 {% endblock %}
 
 {% block bodyEnd %}
