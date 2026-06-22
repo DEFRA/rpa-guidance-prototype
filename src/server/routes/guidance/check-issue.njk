@@ -1,0 +1,37 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">{{ finding.sectionLabel }}</span>
+      <h1 class="govuk-heading-l">{{ finding.issue }}</h1>
+
+      <p class="govuk-body">
+        {% if finding.mustFix %}You must fix this before publishing.{% else %}This is a suggested improvement.{% endif %}
+        {%- if fixed %} You have marked it as fixed.{% endif %}
+      </p>
+
+      <h2 class="govuk-heading-s">Why it matters</h2>
+      <p class="govuk-body">{{ finding.why_it_matters }}</p>
+
+      <h2 class="govuk-heading-s">How to fix it</h2>
+      <p class="govuk-body">{{ finding.recommendation }}</p>
+
+      <form method="post" action="/guidance/check/issues/{{ issueIndex }}" novalidate>
+        <input type="hidden" name="fixed" value="{{ 'false' if fixed else 'true' }}">
+        {{ govukButton({
+          text: "Mark as not fixed" if fixed else "Mark as fixed",
+          classes: "govuk-button--secondary" if fixed else ""
+        }) }}
+      </form>
+
+      <p class="govuk-body">
+        <a class="govuk-link" href="/guidance/check">Back to all issues</a>
+      </p>
+
+    </div>
+  </div>
+{% endblock %}

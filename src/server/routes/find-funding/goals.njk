@@ -1,0 +1,43 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorMessage %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [ { text: errorMessage, href: "#goals" } ]
+        }) }}
+      {% endif %}
+
+      <form action="/find-funding/goals" method="post" novalidate>
+        {{ govukCheckboxes({
+          name: "goals",
+          idPrefix: "goals",
+          fieldset: {
+            legend: {
+              text: "What do you want to do?",
+              isPageHeading: true,
+              classes: "govuk-fieldset__legend--l"
+            }
+          },
+          hint: { text: "Select all that apply." },
+          errorMessage: { text: errorMessage } if errorMessage,
+          items: [
+            { value: "soil", text: "Improve soil health", checked: "soil" in goals },
+            { value: "hedgerows", text: "Manage hedgerows and boundaries", checked: "hedgerows" in goals },
+            { value: "water", text: "Manage water quality", checked: "water" in goals },
+            { value: "woodland", text: "Manage woodland and trees", checked: "woodland" in goals },
+            { value: "equipment", text: "Buy equipment or technology", checked: "equipment" in goals }
+          ]
+        }) }}
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

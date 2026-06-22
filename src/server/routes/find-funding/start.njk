@@ -1,0 +1,18 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Find funding for your land</h1>
+      <p class="govuk-body-l">Find funding schemes that fit your land and what you want to do, with links to the full guidance on GOV.UK.</p>
+      <p class="govuk-body">It takes about 2 minutes and you do not need to sign in.</p>
+
+      {{ govukButton({ text: "Start now", href: "/find-funding/about-you", isStartButton: true }) }}
+
+      <h2 class="govuk-heading-m">Before you start</h2>
+      <p class="govuk-body">Do not enter personal or financial details. This service only helps you find schemes. You apply on GOV.UK.</p>
+    </div>
+  </div>
+{% endblock %}

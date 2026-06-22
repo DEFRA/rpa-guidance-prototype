@@ -1,9 +1,33 @@
 @use "govuk-frontend" as *;
-
-// Example namespaced custom element style CSS classes
+@use "../variables/colours" as colours;
 
 .app-main-wrapper {
   display: block;
   padding-top: govuk-spacing(4);
   padding-bottom: govuk-spacing(3);
+}
+
+// Keep task-list status tags on one line so a long task title wraps instead of
+// the tag breaking across two lines (for example "To fix" becoming "To / fix").
+.govuk-task-list__status .govuk-tag {
+  white-space: nowrap;
+}
+
+// Use the Defra brand green for the confirmation panel and success notification
+// banners, not GOV.UK green. White on #008531 is 4.77:1, which passes AA.
+.govuk-panel--confirmation {
+  background-color: colours.$defra-green;
+}
+
+.govuk-notification-banner--success {
+  border-color: colours.$defra-green;
+  background-color: colours.$defra-green;
+}
+
+.govuk-grid-column-two-thirds,
+.govuk-grid-column-full {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 }

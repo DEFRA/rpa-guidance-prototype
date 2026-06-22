@@ -3,6 +3,8 @@
 {# Import GOVUK components globally #}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
 {% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
 {# Import custom components globally #}
 {% from "heading/macro.njk" import appHeading %}
@@ -42,11 +44,20 @@
 {% endblock %}
 
 {% block beforeContent %}
-  {% if breadcrumbs.length > 1 %}
-    {{ govukBreadcrumbs({
-      items: breadcrumbs
-    }) }}
-  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {{ govukPhaseBanner({
+        tag: { text: "Prototype" },
+        text: "This is a prototype for testing. Nothing you enter is saved or published."
+      }) }}
+      {% if backHref %}
+        {{ govukBackLink({ text: "Back", href: backHref }) }}
+      {% endif %}
+      {% if breadcrumbs.length > 1 %}
+        {{ govukBreadcrumbs({ items: breadcrumbs }) }}
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}
 
 {% block content %}{% endblock %}
@@ -60,14 +71,15 @@
           text: "Privacy"
         },
         {
-          href: "https://www.gov.uk/help/cookies",
+          href: "/cookies",
           text: "Cookies"
         },
         {
-          href: "https://www.gov.uk/help/accessibility-statement",
+          href: "/accessibility-statement",
           text: "Accessibility statement"
         }
-      ]
+      ],
+      html: 'Maintained by the AI Capability and Enablement team at Defra. <a class="govuk-footer__link" href="mailto:AICapabilityAndEnablement@defra.gov.uk">Contact the team</a>.'
     }
   }) }}
 {% endblock %}

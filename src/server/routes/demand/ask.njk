@@ -1,0 +1,46 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <p class="govuk-!-margin-bottom-2">{{ govukTag({ text: "Experimental", classes: "govuk-tag--yellow" }) }}</p>
+      <h1 class="govuk-heading-xl">Find and use guidance</h1>
+      <p class="govuk-body-l">Ask a question in your own words. You will get an answer drawn from published guidance, with links so you can check it.</p>
+
+      {{ govukWarningText({
+        text: "This is an experimental AI tool. Answers can be inaccurate or incomplete, so always check the guidance it links to. Do not enter personal or sensitive information.",
+        iconFallbackText: "Warning"
+      }) }}
+
+      <form action="/demand/answer" method="post" novalidate>
+        {{ govukInput({
+          id: "q",
+          name: "q",
+          label: { text: "What do you want to know?", classes: "govuk-label--m" }
+        }) }}
+        {{ govukButton({ text: "Send" }) }}
+      </form>
+
+      <details class="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">Tips on how to search</span>
+        </summary>
+        <div class="govuk-details__text">
+          <ul class="govuk-list govuk-list--bullet">
+            <li>use keywords or full sentences</li>
+            <li>ask follow-on questions to refine the answer</li>
+            <li>be specific about the scheme or task</li>
+            <li>never include sensitive or personal information</li>
+          </ul>
+        </div>
+      </details>
+
+    </div>
+  </div>
+{% endblock %}

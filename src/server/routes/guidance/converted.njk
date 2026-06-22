@@ -1,0 +1,32 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <h1 class="govuk-heading-l">Your document has been converted</h1>
+
+      <p class="govuk-body">We have converted your Word document into markdown, so you can edit it directly on the next screen.</p>
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Original file" }, value: { text: filename } },
+          { key: { text: "Converted to" }, value: { text: "Markdown" } }
+        ]
+      }) }}
+
+      {{ govukDetails({
+        summaryText: "Why markdown?",
+        text: "Markdown is a simple text format. Editing in markdown keeps the formatting consistent, and makes later changes easier than reworking a Word file."
+      }) }}
+
+      {{ govukButton({ text: "Continue to edit", href: "/guidance/edit" }) }}
+
+    </div>
+  </div>
+{% endblock %}

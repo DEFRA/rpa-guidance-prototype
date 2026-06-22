@@ -1,17 +1,22 @@
 {% extends 'layouts/page.njk' %}
 
 {% block content %}
-  {{ appHeading({
-    text: heading,
-    caption: "rpa-guidance-prototype"
-  }) }}
-
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <div class="govuk-body" data-testid="app-page-body">
-        <p></p>
-      </div>
+      <h1 class="govuk-heading-xl">Make, find and use guidance</h1>
+      <p class="govuk-body">Explore the service end to end, from making guidance to using it.</p>
+
+      <ul class="govuk-list app-journey-nav">
+        {% for entry in entries %}
+          <li class="app-journey-nav__item">
+            <h2 class="govuk-heading-m govuk-!-margin-bottom-1">
+              <a class="govuk-link" href="{{ entry.href }}">{{ entry.title }}</a>
+            </h2>
+            <p class="govuk-body govuk-!-margin-bottom-1">{{ entry.description }}</p>
+            <p class="govuk-body-s govuk-!-margin-bottom-0">{{ entry.audience }}</p>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
-
 {% endblock %}

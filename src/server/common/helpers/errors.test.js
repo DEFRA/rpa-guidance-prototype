@@ -23,7 +23,7 @@ describe('#errors', () => {
     })
 
     expect(result).toEqual(
-      expect.stringContaining('Page not found | rpa-guidance-prototype')
+      expect.stringContaining('Page not found | Rural Payments Agency guidance')
     )
     expect(statusCode).toBe(statusCodes.notFound)
   })

@@ -1,0 +1,44 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <h1 class="govuk-heading-l">Understand the policy</h1>
+      <p class="govuk-body">Record what this guidance must cover, based on the policy you have been given. It gives reviewers the context for your draft.</p>
+
+      <form method="post" action="/guidance/need" novalidate>
+        {{ govukInput({
+          id: "scheme",
+          name: "scheme",
+          label: { text: "Scheme or service name", classes: "govuk-label--m" },
+          value: "Sustainable Farming Incentive"
+        }) }}
+
+        {{ govukCharacterCount({
+          id: "change",
+          name: "change",
+          maxlength: 500,
+          label: { text: "What is new or changing?", classes: "govuk-label--m" },
+          value: "New hedgerow management actions are being added for the 2026 scheme year."
+        }) }}
+
+        {{ govukCharacterCount({
+          id: "audience",
+          name: "audience",
+          maxlength: 500,
+          label: { text: "Who is the guidance for and what do they need to do?", classes: "govuk-label--m" },
+          value: "Farmers and land managers applying for hedgerow actions, and the call handlers who support them."
+        }) }}
+
+        {{ govukButton({ text: "Save and continue" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}
