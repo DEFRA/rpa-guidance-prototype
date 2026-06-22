@@ -1,36 +1,50 @@
 @use '../variables/colours' as *;
 
-// A simple Defra-branded header: the service name in Defra green on white,
-// above the green service navigation bar. (The original referenced a logo
-// image that was never added to the repo, so this is text only.)
+// The Defra-branded header: the Defra logo and the service name on white,
+// above the green service navigation bar.
 .defra-header {
   background-color: $govuk-white;
-  border-bottom: 1px solid $govuk-mid-grey;
 }
 
 .defra-header__inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
   padding-top: 12px;
   padding-bottom: 12px;
 }
 
+.defra-header__brand-group {
+  display: contents;
+}
+
+.defra-header__logo {
+  height: 60px;
+  width: auto;
+}
+
 .defra-header__service-name {
-  display: inline-block;
+  justify-self: center;
   font-family: Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 22px;
   font-weight: 700;
+  color: $defra-green-aa;
   line-height: 1.2;
   text-decoration: none;
 
-  &,
-  &:link,
+  &:link {
+    color: $defra-green-aa;
+  }
+
   &:visited {
-    color: $defra-green;
+    color: $defra-green-aa;
   }
 
   &:hover {
-    color: $defra-green;
+    color: $defra-green-aa;
     text-decoration: underline;
     text-decoration-thickness: 3px;
     text-underline-offset: 0.15em;
@@ -46,8 +60,28 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .defra-header__inner {
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+  }
+
   .defra-header__service-name {
     font-size: 18px;
+    justify-self: start;
+  }
+
+  .defra-header__logo {
+    height: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .defra-header__service-name {
+    font-size: 16px;
+  }
+
+  .defra-header__logo {
+    height: 40px;
   }
 }
