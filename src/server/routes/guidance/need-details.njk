@@ -1,0 +1,71 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">Enter the details of the need</h1>
+      <p class="govuk-body">Record what this guidance must cover. It gives reviewers the context for your draft.</p>
+
+      <form method="post" action="/guidance/need/details" novalidate>
+
+        {{ govukRadios({
+          name: "type",
+          idPrefix: "type",
+          fieldset: { legend: { text: "Type of guidance", classes: "govuk-fieldset__legend--m" } },
+          items: [
+            { value: "new", text: "New guidance", checked: values.type == "new" },
+            { value: "change", text: "An update to existing guidance", checked: values.type == "change" },
+            { value: "unsure", text: "Not sure yet", checked: values.type == "unsure" }
+          ]
+        }) }}
+
+        {{ govukInput({
+          id: "scheme",
+          name: "scheme",
+          label: { text: "Scheme or service name", classes: "govuk-label--m" },
+          value: values.scheme
+        }) }}
+
+        {{ govukRadios({
+          name: "audienceType",
+          idPrefix: "audienceType",
+          fieldset: { legend: { text: "Who is this guidance mainly for?", classes: "govuk-fieldset__legend--m" } },
+          hint: { text: "This shapes the tone and level of detail." },
+          items: [
+            { value: "customers", text: "Customers and their agents", hint: { text: "Farmers, land managers and their advisers" }, checked: values.audienceType == "customers" },
+            { value: "contact-centre", text: "Contact centre staff", hint: { text: "Call handlers answering customer queries" }, checked: values.audienceType == "contact-centre" },
+            { value: "processing", text: "Processing and operational staff", hint: { text: "Teams processing applications, claims and agreements" }, checked: values.audienceType == "processing" }
+          ]
+        }) }}
+
+        {{ govukCharacterCount({
+          id: "change",
+          name: "change",
+          maxlength: 500,
+          label: { text: "What is new or changing?", classes: "govuk-label--m" },
+          value: values.change
+        }) }}
+
+        {{ govukCharacterCount({
+          id: "need",
+          name: "need",
+          maxlength: 500,
+          label: { text: "What does this audience need to be able to do?", classes: "govuk-label--m" },
+          value: values.need
+        }) }}
+
+        {{ govukButton({ text: "Save and continue" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

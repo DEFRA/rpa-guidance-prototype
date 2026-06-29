@@ -4,14 +4,16 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 
+{% set page = 'guidance' %}
+
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
       <h1 class="govuk-heading-l">Your document has been converted</h1>
 
-      <p class="govuk-body">We have converted your Word document into markdown, so you can edit it directly on the next screen.</p>
+      <p class="govuk-body">We have converted your Word document into markdown so you can edit it. Your headings have become sections, and we have written a description for each image.</p>
 
       {{ govukSummaryList({
         rows: [
@@ -21,11 +23,11 @@
       }) }}
 
       {{ govukDetails({
-        summaryText: "Why markdown?",
-        text: "Markdown is a simple text format. Editing in markdown keeps the formatting consistent, and makes later changes easier than reworking a Word file."
+        summaryText: "What is markdown?",
+        html: "<p class='govuk-body'>Markdown is a simple way to write formatted text. It is used widely across GOV.UK and government services.</p><p class='govuk-body'>You write in plain text and use a few simple marks, for example <code>##</code> for a heading or <code>-</code> for a bullet point. It keeps formatting consistent and makes editing and republishing easier than a Word file.</p><p class='govuk-body govuk-!-margin-bottom-0'>You do not need to know markdown. The editor shows a live preview of how it will look.</p>"
       }) }}
 
-      {{ govukButton({ text: "Continue to edit", href: "/guidance/edit" }) }}
+      {{ govukButton({ text: "Continue", href: "/guidance/sections" }) }}
 
     </div>
   </div>

@@ -3,6 +3,9 @@
 {% from "govuk/components/task-list/macro.njk" import govukTaskList %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
+{% set pageTitle = 'Make and publish guides' %}
+{% set page = 'guidance' %}
+
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
@@ -15,8 +18,12 @@
         }) }}
       {% endif %}
 
-      <h1 class="govuk-heading-xl">Make and publish guidance</h1>
-      <p class="govuk-body">Work through the phases. You draft the guidance, then send it to others to review, approve and readiness test before you publish it.</p>
+      <h1 class="govuk-heading-xl">Make and publish guides</h1>
+      <p class="govuk-body">Work through the phases. You draft the guide, then send it to others to review, approve and readiness test before you publish it.</p>
+
+      {% if editGuide %}
+        <p class="govuk-body">You are updating <strong>{{ editGuide.title }}</strong>. <a class="govuk-link" href="/guidance/changes">See what's changed</a> against the published version.</p>
+      {% endif %}
 
       {{ govukTaskList({ items: items }) }}
 

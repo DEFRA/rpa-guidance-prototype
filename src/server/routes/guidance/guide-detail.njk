@@ -1,0 +1,77 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set page = 'guidance' %}
+{% set bodyClasses = "app-wide-page" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if flash %}
+        {{ govukNotificationBanner({
+          type: "success" if flash.success else undefined,
+          titleText: "Success" if flash.success else "Important",
+          text: flash.text
+        }) }}
+      {% endif %}
+
+      <span class="govuk-caption-l">Guide</span>
+      <h1 class="govuk-heading-l">{{ guide.title }}</h1>
+
+      <p class="govuk-!-margin-bottom-4">{{ govukTag(guide.statusTag) }}</p>
+
+      <p class="govuk-body-l">{{ guide.summary }}</p>
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Reference" }, value: { text: guide.reference } },
+          { key: { text: "Scheme" }, value: { text: guide.scheme } },
+          { key: { text: "Who it is for" }, value: { text: guide.audience } },
+          { key: { text: "Owner" }, value: { text: guide.owner } },
+          { key: { text: "Created" }, value: { text: guide.created } },
+          { key: { text: "Last updated" }, value: { text: guide.updated } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-m">Documents this guide was built from</h2>
+      {% if guide.contextDocs.length %}
+        <ul class="govuk-list app-doc-listing">
+          {% for doc in guide.contextDocs %}
+            <li class="app-doc-listing__item">
+              <span class="app-doc-listing__name">{{ doc.name }}</span>
+              <span class="app-doc-listing__type">{{ doc.type }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="govuk-body">No documents were ingested for this guide.</p>
+      {% endif %}
+
+      {% if editable %}
+        <div class="govuk-button-group">
+          {% if isPublished %}
+            {{ govukButton({ text: "View published guide", href: publishedHref }) }}
+            {{ govukButton({ text: "Edit guide", href: editHref, classes: "govuk-button--secondary" }) }}
+          {% else %}
+            {{ govukButton({ text: actionLabel, href: editHref }) }}
+          {% endif %}
+        </div>
+      {% else %}
+        {{ govukInsetText({ text: "This guide belongs to " + guide.owner + ". You can read it, but you need their permission to edit it." }) }}
+        <form method="post" action="{{ requestHref }}" novalidate>
+          {{ govukButton({ text: "Request edit access" }) }}
+        </form>
+        {% if isPublished %}
+          <p class="govuk-body"><a class="govuk-link" href="{{ publishedHref }}">View the published guide</a></p>
+        {% endif %}
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}

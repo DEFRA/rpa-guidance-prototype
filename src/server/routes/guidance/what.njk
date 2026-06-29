@@ -1,0 +1,40 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set pageTitle = 'What do you want to do?' %}
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorMessage %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: errorMessage, href: "#choice" }]
+        }) }}
+      {% endif %}
+
+      <form method="post" action="/guidance/what" novalidate>
+        {{ govukRadios({
+          name: "choice",
+          idPrefix: "choice",
+          fieldset: {
+            legend: { text: "What do you want to do?", isPageHeading: true, classes: "govuk-fieldset__legend--l" }
+          },
+          errorMessage: { text: errorMessage } if errorMessage,
+          items: [
+            { value: "new", text: "Create a new guide", hint: { text: "Start from a Word document or a blank guide." } },
+            { value: "existing", text: "Update an existing guide", hint: { text: "Choose a published or draft guide to revise." } }
+          ]
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

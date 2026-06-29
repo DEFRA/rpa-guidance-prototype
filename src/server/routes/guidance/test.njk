@@ -2,18 +2,19 @@
 
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set page = 'guidance' %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
 
       {% if status == 'awaiting-readiness' %}
 
-        <h1 class="govuk-heading-l">Guidance sent for readiness testing</h1>
-        <p class="govuk-body">The Model Office team runs the guidance against real scenarios in a simulated environment, to catch gaps and contradictions before it goes live.</p>
-        <h2 class="govuk-heading-m">What happens next</h2>
-        <p class="govuk-body">They either pass it, or send back the scenarios that failed so you can fix them.</p>
+        <h1 class="govuk-heading-l">Guide sent for readiness testing</h1>
+        <p class="govuk-body">The Model Office team runs it against your scenarios, then passes it or sends back what failed.</p>
 
         <hr class="govuk-section-break govuk-section-break--visible govuk-section-break--l">
         <h2 class="govuk-heading-s">Prototype controls</h2>
@@ -30,10 +31,10 @@
       {% elif status == 'issues' %}
 
         <h1 class="govuk-heading-l">The Model Office team found issues</h1>
-        {{ govukInsetText({ text: "Two scenarios failed: a new applicant could not tell which costs are eligible, and the appeals step was unclear." }) }}
+        {{ govukInsetText({ text: "Two scenarios failed: a processor could not tell which hold code to apply when escalating, and the split and merge example was unclear." }) }}
         <p class="govuk-body">Make the changes, then send it for testing again.</p>
         <div class="govuk-button-group">
-          {{ govukButton({ text: "Edit the guidance", href: "/guidance/edit" }) }}
+          {{ govukButton({ text: "Edit the guide", href: "/guidance/sections" }) }}
         </div>
         <form method="post" action="/guidance/test" novalidate>
           {{ govukButton({ text: "Send for testing again", name: "action", value: "send", classes: "govuk-button--secondary" }) }}
@@ -42,21 +43,19 @@
       {% elif status == 'done' %}
 
         <h1 class="govuk-heading-l">Readiness testing passed</h1>
-        <p class="govuk-body">The Model Office team passed the guidance. The next phase is the pre-publish check.</p>
+        <p class="govuk-body">The Model Office team passed the guide. The next phase is the pre-publish check.</p>
         <p class="govuk-body"><a class="govuk-link" href="/guidance/task-list">Return to the task list</a></p>
 
       {% else %}
 
-        <h1 class="govuk-heading-l">Send the guidance for readiness testing</h1>
-        <p class="govuk-body">The Model Office team runs the guidance against real scenarios in a simulated environment, to catch gaps and contradictions before it goes live.</p>
+        <h1 class="govuk-heading-l">Test scenarios for readiness testing</h1>
+        <p class="govuk-body">AI suggested these from your guide. The Model Office team will test the guide against them.</p>
 
-        <h2 class="govuk-heading-m">What readiness testing checks</h2>
-        <ul class="govuk-list govuk-list--bullet">
-          <li>a customer or applicant can follow it to complete the task</li>
-          <li>it holds up against real cases and the awkward edge cases</li>
-          <li>it does not contradict other published guidance</li>
-          <li>call handlers can answer queries using it</li>
-        </ul>
+        {{ govukInsetText({ text: "Review the suggested scenarios. Change or remove any, and add any that are missing, before you send them." }) }}
+
+        {{ govukSummaryList({ rows: scenarioRows }) }}
+
+        {{ govukButton({ text: "Add another scenario", href: "/guidance/test/scenario/new", classes: "govuk-button--secondary" }) }}
 
         <form method="post" action="/guidance/test" novalidate>
           {{ govukButton({ text: "Send for readiness testing", name: "action", value: "send" }) }}

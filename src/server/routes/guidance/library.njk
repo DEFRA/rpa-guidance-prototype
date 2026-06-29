@@ -1,0 +1,135 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{% set page = 'guidance' %}
+{% set bodyClasses = "app-wide-page" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Guides</h1>
+      <p class="govuk-body">Find a guide by title, scheme, owner, or even a document it was built from.</p>
+    </div>
+  </div>
+
+  <form method="get" action="/guidance/library" class="app-library" data-module="app-guide-library">
+
+    <div class="app-library__search">
+      {{ govukInput({
+        id: "q",
+        name: "q",
+        value: q,
+        label: { text: "Search guides", classes: "govuk-label--s" },
+        formGroup: { classes: "app-library__search-group" },
+        spellcheck: false,
+        attributes: { autocomplete: "off" }
+      }) }}
+      {{ govukButton({ text: "Search", classes: "app-library__search-button govuk-!-margin-bottom-0" }) }}
+    </div>
+
+    <div class="app-library__toolbar">
+      <button type="button" class="app-toggle" data-module="app-filter-toggle" aria-expanded="true" aria-controls="library-filters">Hide filters</button>
+    </div>
+
+    <div class="govuk-grid-row app-library__layout">
+
+      <div class="govuk-grid-column-one-quarter app-library__filter-col" id="library-filters">
+        {{ govukCheckboxes({
+          idPrefix: "status",
+          name: "status",
+          classes: "govuk-checkboxes--small",
+          fieldset: { legend: { text: "Status", classes: "govuk-fieldset__legend--s" } },
+          items: statusFacets
+        }) }}
+        {{ govukCheckboxes({
+          idPrefix: "scheme",
+          name: "scheme",
+          classes: "govuk-checkboxes--small",
+          fieldset: { legend: { text: "Scheme", classes: "govuk-fieldset__legend--s" } },
+          items: schemeFacets
+        }) }}
+        <div class="app-library__filter-actions">
+          {{ govukButton({
+            text: "Apply filters",
+            classes: "govuk-button--secondary govuk-!-margin-bottom-2",
+            attributes: { "data-module": "app-apply-filters" }
+          }) }}
+          <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{{ clearHref }}">Clear filters</a></p>
+        </div>
+      </div>
+
+      <div class="govuk-grid-column-three-quarters app-library__results-col">
+
+        {% if selectedFilters.length %}
+          <div class="app-library__selected">
+            <h2 class="govuk-heading-s govuk-!-margin-bottom-2">Selected filters</h2>
+            <ul class="app-library__tags">
+              {% for f in selectedFilters %}
+                <li><a class="app-filter-tag" href="{{ f.href }}">{{ f.label }} <span aria-hidden="true">&times;</span><span class="govuk-visually-hidden">, remove</span></a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <div class="app-library__results-head">
+          <p class="govuk-body app-library__count govuk-!-margin-bottom-0">
+            {% if totalMatches %}Showing {{ rangeStart }} to {{ rangeEnd }} of {{ totalMatches }} guides{% else %}No guides found{% endif %}
+          </p>
+        </div>
+
+        {% if guides.length %}
+          <div class="app-table-scroll">
+            <table class="govuk-table app-guide-table">
+              <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                  <th scope="col" class="govuk-table__header" aria-sort="{{ sortHeaders.title.ariaSort }}">
+                    <a class="app-sort-link" href="{{ sortHeaders.title.href }}">Guide</a>
+                  </th>
+                  <th scope="col" class="govuk-table__header" aria-sort="{{ sortHeaders.scheme.ariaSort }}">
+                    <a class="app-sort-link" href="{{ sortHeaders.scheme.href }}">Scheme</a>
+                  </th>
+                  <th scope="col" class="govuk-table__header" aria-sort="{{ sortHeaders.owner.ariaSort }}">
+                    <a class="app-sort-link" href="{{ sortHeaders.owner.href }}">Owner</a>
+                  </th>
+                  <th scope="col" class="govuk-table__header" aria-sort="{{ sortHeaders.updated.ariaSort }}">
+                    <a class="app-sort-link" href="{{ sortHeaders.updated.href }}">Last updated</a>
+                  </th>
+                  <th scope="col" class="govuk-table__header" aria-sort="{{ sortHeaders.status.ariaSort }}">
+                    <a class="app-sort-link" href="{{ sortHeaders.status.href }}">Status</a>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="govuk-table__body">
+                {% for g in guides %}
+                  <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header app-guide-table__title">
+                      <a class="govuk-link" href="{{ g.detailHref }}">{{ g.title }}</a>
+                    </th>
+                    <td class="govuk-table__cell">{{ g.scheme }}</td>
+                    <td class="govuk-table__cell">{{ g.owner }}</td>
+                    <td class="govuk-table__cell app-guide-table__nowrap">{{ g.updated }}</td>
+                    <td class="govuk-table__cell">{{ govukTag(g.statusTag) }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if pagination %}
+            {{ govukPagination(pagination) }}
+          {% endif %}
+        {% else %}
+          <p class="govuk-body">No guides match your search. <a class="govuk-link" href="{{ clearHref }}">Clear filters</a> to see all guides.</p>
+        {% endif %}
+
+      </div>
+
+    </div>
+  </form>
+{% endblock %}

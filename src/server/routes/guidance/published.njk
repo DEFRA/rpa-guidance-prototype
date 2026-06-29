@@ -2,21 +2,23 @@
 
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
 
+{% set page = 'guidance' %}
+
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
       {{ govukPanel({
-        titleText: "Guidance published",
+        titleText: "Guide published",
         html: "Your reference<br><strong>" + reference + "</strong>"
       }) }}
 
       <h2 class="govuk-heading-m">What happens next</h2>
-      <p class="govuk-body">The guidance is now on the Guidance Hub. Call handlers and customers can find it through the find and use guidance service.</p>
+      <p class="govuk-body">Your guide is now on the Guidance Hub. Caseworkers and processors can find it through the find and use guides service.</p>
 
       <ul class="govuk-list">
-        <li class="govuk-!-margin-bottom-3"><a class="govuk-link" href="/demand/sign-in">See how call handlers use this guidance</a></li>
-        <li><a class="govuk-link" href="/guidance/start">Make another piece of guidance</a></li>
+        <li class="govuk-!-margin-bottom-3"><a class="govuk-link" href="/guidance/published/sfi23-parcel-tenure">View the published guide</a></li>
+        <li><a class="govuk-link" href="/guidance/start">Make another guide</a></li>
       </ul>
 
     </div>

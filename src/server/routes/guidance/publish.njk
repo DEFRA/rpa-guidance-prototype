@@ -2,18 +2,20 @@
 
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
+{% set page = 'guidance' %}
+
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
       <h1 class="govuk-heading-l">Ready to publish</h1>
       <p class="govuk-body">You have made the essential fixes from the pre-publish check.</p>
 
-      <h2 class="govuk-heading-m">When you publish this guidance</h2>
+      <h2 class="govuk-heading-m">When you publish this guide</h2>
       <ul class="govuk-list govuk-list--bullet">
         <li>it goes live on the Guidance Hub</li>
-        <li>call handlers and customers can find and use it straight away</li>
+        <li>caseworkers and processors can find and use it straight away</li>
         <li>to change it after publishing, you make and publish a new version</li>
       </ul>
 

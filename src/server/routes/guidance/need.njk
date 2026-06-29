@@ -1,42 +1,74 @@
 {% extends 'layouts/page.njk' %}
 
-{% from "govuk/components/input/macro.njk" import govukInput %}
-{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+{% from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set page = 'guidance' %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
-      <h1 class="govuk-heading-l">Understand the policy</h1>
-      <p class="govuk-body">Record what this guidance must cover, based on the policy you have been given. It gives reviewers the context for your draft.</p>
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">Get the context for this guidance</h1>
+      <p class="govuk-body">Upload any briefing or operational documents and AI will draft the details for you to check, or enter them yourself.</p>
 
-      <form method="post" action="/guidance/need" novalidate>
-        {{ govukInput({
-          id: "scheme",
-          name: "scheme",
-          label: { text: "Scheme or service name", classes: "govuk-label--m" },
-          value: "Sustainable Farming Incentive"
+      {% if errorMessage %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: errorMessage, href: "#hasDocument" }]
+        }) }}
+      {% endif %}
+
+      {% set uploadHtml %}
+        <div class="moj-multi-file-upload" data-module="moj-multi-file-upload" data-upload-url="/guidance/need/documents/add" data-delete-url="/guidance/need/documents/delete" data-dropzone-hint-text="Drag and drop documents here, or" data-dropzone-button-text="Choose a document">
+          <div class="moj-multi-file__uploaded-files{% if not (docs and docs | length) %} moj-hidden{% endif %}">
+            <h2 class="govuk-heading-s govuk-!-margin-bottom-2">Documents added</h2>
+            <div class="govuk-summary-list moj-multi-file-upload__list">
+              {% for doc in docs %}
+                <div class="govuk-summary-list__row moj-multi-file-upload__row">
+                  <div class="govuk-summary-list__value moj-multi-file-upload__message">{{ doc }}</div>
+                  <div class="govuk-summary-list__actions moj-multi-file-upload__actions">
+                    <button type="submit" name="delete" value="{{ doc }}" class="moj-multi-file-upload__delete govuk-button govuk-button--secondary govuk-!-margin-bottom-0">Delete <span class="govuk-visually-hidden">{{ doc }}</span></button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="moj-multi-file-upload__upload">
+            {{ govukFileUpload({
+              id: "documents",
+              name: "documents",
+              classes: "moj-multi-file-upload__input",
+              label: { text: "Upload a document" },
+              hint: { text: "Word document (.docx) or PDF. You can add more than one." }
+            }) }}
+            {{ govukButton({ text: "Upload", name: "action", value: "add", classes: "moj-multi-file-upload__button govuk-button--secondary" }) }}
+          </div>
+        </div>
+      {% endset %}
+
+      <form method="post" action="/guidance/need/upload" enctype="multipart/form-data" novalidate>
+        {{ govukRadios({
+          name: "hasDocument",
+          idPrefix: "hasDocument",
+          fieldset: { legend: { text: "Do you have documents to upload?", classes: "govuk-fieldset__legend--m" } },
+          errorMessage: { text: errorMessage } if errorMessage,
+          items: [
+            { value: "yes", text: "Yes, upload them", checked: values.hasDocument == "yes", conditional: { html: uploadHtml } },
+            { value: "no", text: "No, I will enter the details myself", checked: values.hasDocument == "no" }
+          ]
         }) }}
 
-        {{ govukCharacterCount({
-          id: "change",
-          name: "change",
-          maxlength: 500,
-          label: { text: "What is new or changing?", classes: "govuk-label--m" },
-          value: "New hedgerow management actions are being added for the 2026 scheme year."
+        {{ govukDetails({
+          summaryText: "What counts as a briefing document?",
+          html: "<p class='govuk-body'>A briefing or operational document is the background that tells you what guidance to write, for example a policy note, a change request or an operational instruction.</p><p class='govuk-body govuk-!-margin-bottom-0'>It is not the guidance itself. You upload your draft guidance later, in phase 2.</p>"
         }) }}
 
-        {{ govukCharacterCount({
-          id: "audience",
-          name: "audience",
-          maxlength: 500,
-          label: { text: "Who is the guidance for and what do they need to do?", classes: "govuk-label--m" },
-          value: "Farmers and land managers applying for hedgerow actions, and the call handlers who support them."
-        }) }}
-
-        {{ govukButton({ text: "Save and continue" }) }}
+        {{ govukButton({ text: "Continue", name: "action", value: "continue" }) }}
       </form>
 
     </div>

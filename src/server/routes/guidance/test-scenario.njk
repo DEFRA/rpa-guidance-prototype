@@ -1,0 +1,40 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">{{ "Add a test scenario" if isNew else "Change the test scenario" }}</h1>
+
+      <form method="post" action="/guidance/test/scenario/{{ 'new' if isNew else index }}" novalidate>
+        {{ govukInput({
+          id: "title",
+          name: "title",
+          label: { text: "What you are testing", classes: "govuk-label--s" },
+          value: title
+        }) }}
+        {{ govukTextarea({
+          id: "body",
+          name: "body",
+          rows: 4,
+          label: { text: "What should happen", classes: "govuk-label--s" },
+          hint: { text: "Write it as Given, When, Then if that helps." },
+          value: body
+        }) }}
+
+        <div class="govuk-button-group">
+          {{ govukButton({ text: "Save scenario", name: "action", value: "save" }) }}
+          {% if not isNew %}
+            {{ govukButton({ text: "Remove scenario", name: "action", value: "remove", classes: "govuk-button--warning" }) }}
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">This might already be covered by existing guidance</h1>
+      <p class="govuk-body">AI thinks your documents relate to guidance that is already published. Updating it avoids creating a duplicate.</p>
+
+      {% if errorMessage %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: errorMessage, href: "#choice" }]
+        }) }}
+      {% endif %}
+
+      {% set matchHtml %}
+        Possible match: <strong>{{ match.title }}</strong><br>
+        <a class="govuk-link" href="/guidance/published/{{ match.id }}" target="_blank" rel="noopener noreferrer">View this guidance (opens in new tab)</a>
+      {% endset %}
+      {{ govukInsetText({ html: matchHtml }) }}
+
+      <form method="post" action="/guidance/need/existing" novalidate>
+        {{ govukRadios({
+          name: "choice",
+          idPrefix: "choice",
+          fieldset: { legend: { text: "What do you want to do?", classes: "govuk-fieldset__legend--m" } },
+          errorMessage: { text: errorMessage } if errorMessage,
+          items: [
+            { value: "update", text: "Update " + match.title },
+            { value: "new", text: "This is new guidance" }
+          ]
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}
