@@ -1,0 +1,100 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if flash %}
+        {{ govukNotificationBanner({
+          type: "success" if flash.success else undefined,
+          titleText: "Success" if flash.success else "Important",
+          text: flash.text
+        }) }}
+      {% endif %}
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">Draft the guide</h1>
+      <p class="govuk-body">Edit the whole guide below. Use the contents to jump to a section, and the Preview tab to see how it will look when published.</p>
+    </div>
+  </div>
+
+  {% set formatHelp %}
+    <p class="govuk-body">You write the guide in markdown: a few simple marks for formatting. You do not need to learn it all, and the preview shows how it will look.</p>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">To do this</th>
+          <th scope="col" class="govuk-table__header">Type this</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row"><td class="govuk-table__cell">A section heading</td><td class="govuk-table__cell"><code>## Heading</code></td></tr>
+        <tr class="govuk-table__row"><td class="govuk-table__cell">A sub-heading under it</td><td class="govuk-table__cell"><code>### Sub-heading</code></td></tr>
+        <tr class="govuk-table__row"><td class="govuk-table__cell">Bold text</td><td class="govuk-table__cell"><code>**important**</code></td></tr>
+        <tr class="govuk-table__row"><td class="govuk-table__cell">A bullet list</td><td class="govuk-table__cell"><code>- first point</code></td></tr>
+        <tr class="govuk-table__row"><td class="govuk-table__cell">A numbered list</td><td class="govuk-table__cell"><code>1. first step</code></td></tr>
+        <tr class="govuk-table__row"><td class="govuk-table__cell">A link</td><td class="govuk-table__cell"><code>[link text](https://www.gov.uk)</code></td></tr>
+      </tbody>
+    </table>
+    <p class="govuk-body govuk-!-margin-bottom-0">Images show as labelled placeholders in the preview. To add one, write an image mark, for example <code>![Description of the screen](screenshot-6.png)</code>, then set its description on the image descriptions screen.</p>
+  {% endset %}
+
+  <div class="app-guide-editor__layout">
+
+    <nav class="app-guide-editor__contents" id="guide-contents" aria-label="Guide contents" data-module="app-guide-contents">
+      <h2 class="govuk-heading-s app-guide-editor__contents-title">Contents</h2>
+      <button type="button" class="app-toggle" data-module="app-contents-hide" aria-expanded="true" aria-controls="guide-contents">Hide<span class="govuk-visually-hidden"> contents</span></button>
+      <ul class="govuk-list app-contents">
+        {% for item in contentsItems %}
+          <li class="app-contents__item{% if item.level == 2 %} app-contents__item--sub{% elif item.level == 3 %} app-contents__item--sub2{% endif %}">
+            <a class="govuk-link app-contents__link" href="{{ item.href }}" data-heading="{{ item.text }}">{{ item.text }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="app-guide-editor__main">
+      <button type="button" class="app-toggle app-guide-editor__show-contents" data-module="app-contents-show" aria-expanded="false" aria-controls="guide-contents" hidden>Show contents</button>
+      <form method="post" action="/guidance/sections" data-module="app-markdown-editor" novalidate>
+        {% if fix %}<input type="hidden" name="fix" value="{{ fix }}">{% endif %}
+
+        <div class="govuk-tabs app-guide-editor__tabs" data-module="govuk-tabs">
+          <h2 class="govuk-tabs__title">Write or preview</h2>
+          <ul class="govuk-tabs__list">
+            <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+              <a class="govuk-tabs__tab" href="#editor-write">Write</a>
+            </li>
+            <li class="govuk-tabs__list-item">
+              <a class="govuk-tabs__tab" href="#editor-preview">Preview</a>
+            </li>
+          </ul>
+          <div class="govuk-tabs__panel" id="editor-write">
+            {{ govukTextarea({
+              id: "body",
+              name: "body",
+              rows: 24,
+              label: { text: "Guide content", classes: "govuk-label--s" },
+              classes: "app-editor__input app-guide-editor__input",
+              spellcheck: true,
+              value: body
+            }) }}
+            {{ govukDetails({ summaryText: "How to format the guide", html: formatHelp }) }}
+          </div>
+          <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="editor-preview">
+            <div class="app-markdown-preview" data-module="app-markdown-preview" role="region" aria-label="Guide preview" tabindex="0">
+              {{ previewHtml | safe }}
+            </div>
+          </div>
+        </div>
+
+        {{ govukButton({ text: "Save and continue", name: "action", value: "save" }) }}
+      </form>
+    </div>
+
+  </div>
+{% endblock %}

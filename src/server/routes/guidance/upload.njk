@@ -1,34 +1,69 @@
 {% extends 'layouts/page.njk' %}
 
 {% from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set page = 'guidance' %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">Start your draft</h1>
+      <p class="govuk-body">Upload your draft as Word documents and AI will convert them to text you can edit. Or start from a blank guide and write it here.</p>
+
       {% if errorMessage %}
         {{ govukErrorSummary({
           titleText: "There is a problem",
-          errorList: [ { text: errorMessage, href: "#file" } ]
+          errorList: [{ text: errorMessage, href: "#startMethod" }]
         }) }}
       {% endif %}
 
-      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
-      <h1 class="govuk-heading-l">Upload the guidance document</h1>
-      <p class="govuk-body">Upload your draft as a Word document (.docx). We will convert it to text you can edit on the next screen.</p>
+      {% set uploadHtml %}
+        <div class="moj-multi-file-upload" data-module="moj-multi-file-upload" data-upload-url="/guidance/upload/documents/add" data-delete-url="/guidance/upload/documents/delete" data-dropzone-hint-text="Drag and drop documents here, or" data-dropzone-button-text="Choose a document">
+          <div class="moj-multi-file__uploaded-files{% if not (docs and docs | length) %} moj-hidden{% endif %}">
+            <h2 class="govuk-heading-s govuk-!-margin-bottom-2">Documents added</h2>
+            <div class="govuk-summary-list moj-multi-file-upload__list">
+              {% for doc in docs %}
+                <div class="govuk-summary-list__row moj-multi-file-upload__row">
+                  <div class="govuk-summary-list__value moj-multi-file-upload__message">{{ doc }}</div>
+                  <div class="govuk-summary-list__actions moj-multi-file-upload__actions">
+                    <button type="submit" name="delete" value="{{ doc }}" class="moj-multi-file-upload__delete govuk-button govuk-button--secondary govuk-!-margin-bottom-0">Delete <span class="govuk-visually-hidden">{{ doc }}</span></button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="moj-multi-file-upload__upload">
+            {{ govukFileUpload({
+              id: "documents",
+              name: "documents",
+              classes: "moj-multi-file-upload__input",
+              label: { text: "Upload a Word document", classes: "govuk-visually-hidden" },
+              hint: { text: "It must be a .docx file. You can add more than one." },
+              attributes: { accept: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+            }) }}
+            {{ govukButton({ text: "Upload", name: "action", value: "add", classes: "moj-multi-file-upload__button govuk-button--secondary" }) }}
+          </div>
+        </div>
+      {% endset %}
 
       <form method="post" action="/guidance/upload" enctype="multipart/form-data" novalidate>
-        {{ govukFileUpload({
-          id: "file",
-          name: "file",
-          label: { text: "Upload a file", classes: "govuk-label--m" },
-          attributes: { accept: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
-          errorMessage: { text: errorMessage } if errorMessage
+        {{ govukRadios({
+          name: "startMethod",
+          idPrefix: "startMethod",
+          fieldset: { legend: { text: "How do you want to start your draft?", classes: "govuk-fieldset__legend--m" } },
+          errorMessage: { text: errorMessage } if errorMessage,
+          items: [
+            { value: "upload", text: "Upload Word documents", checked: values.startMethod == "upload", conditional: { html: uploadHtml } },
+            { value: "blank", text: "Start from a blank guide", checked: values.startMethod == "blank" }
+          ]
         }) }}
 
-        {{ govukButton({ text: "Upload and convert" }) }}
+        {{ govukButton({ text: "Continue", name: "action", value: "continue" }) }}
       </form>
 
     </div>

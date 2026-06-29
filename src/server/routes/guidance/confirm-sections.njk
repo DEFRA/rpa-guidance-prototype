@@ -1,0 +1,58 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorMessage %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: errorMessage, href: "#structureOk" }]
+        }) }}
+      {% endif %}
+
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
+      <h1 class="govuk-heading-l">Check the sections</h1>
+      <p class="govuk-body">We split your document into these sections from its headings. Check they are right before you edit them.</p>
+
+      <ul class="govuk-list app-section-list">
+        {% for section in sections %}
+          <li class="app-section-list__item">
+            <div class="app-indent-{{ section.indent }}">
+              <span class="govuk-visually-hidden">{% if section.isTitle %}Document title: {% elif section.level == 2 %}Section: {% else %}Sub-section: {% endif %}</span>
+              {% if section.isTitle %}
+                <span class="govuk-!-font-weight-bold">{{ section.heading }}</span>
+              {% else %}
+                {{ section.heading }}
+              {% endif %}
+            </div>
+            {% for sub in section.subHeadings %}
+              <div class="app-subheading app-indent-{{ sub.indent }}"><span class="govuk-visually-hidden">Sub-heading: </span>{{ sub.text }}</div>
+            {% endfor %}
+          </li>
+        {% endfor %}
+      </ul>
+
+      <form method="post" action="/guidance/confirm-sections" novalidate>
+        {{ govukRadios({
+          name: "structureOk",
+          fieldset: { legend: { text: "Have we got this right?", classes: "govuk-fieldset__legend--m" } },
+          errorMessage: { text: errorMessage } if errorMessage,
+          items: [
+            { value: "yes", text: "Yes, these sections are right" },
+            { value: "no", text: "No, I need to change them" }
+          ]
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

@@ -3,23 +3,27 @@
 {% from "govuk/components/task-list/macro.njk" import govukTaskList %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
+{% set page = 'guidance' %}
+
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-      <span class="govuk-caption-l">Phase {{ phase.number }} of 5: {{ phase.name }}</span>
+      <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
 
       {% if state == 'blocked' %}
 
         <h1 class="govuk-heading-l">The pre-publish check found things to fix</h1>
-        <p class="govuk-body">An AI check reviewed the guidance against publishing standards. You must make {{ remaining }} essential {{ "fix" if remaining == 1 else "fixes" }} before you can publish.</p>
+        <p class="govuk-body">An AI check reviewed the guide against publishing standards. You must make {{ remaining }} essential {{ "fix" if remaining == 1 else "fixes" }} before you can publish.</p>
+
+        <p class="govuk-body">You have fixed {{ fixedCount }} of {{ mustFixTotal }} essential {{ "issue" if mustFixTotal == 1 else "issues" }}.</p>
 
         <h2 class="govuk-heading-m">Essential fixes</h2>
         <p class="govuk-body">You cannot publish until these are fixed.</p>
         {{ govukTaskList({ idPrefix: "issues-to-fix", items: mustFixItems }) }}
 
         <form method="post" action="/guidance/check/fix-all" novalidate>
-          {{ govukButton({ text: "Mark all as fixed", classes: "govuk-button--secondary" }) }}
+          {{ govukButton({ text: "I have made all the essential fixes", classes: "govuk-button--secondary" }) }}
         </form>
 
         {% if considerItems | length %}

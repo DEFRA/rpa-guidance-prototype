@@ -1,87 +1,102 @@
 /**
  * Mock analysis response data for development/testing.
  * Used when GUIDANCE_API_MOCK_ANALYSIS is enabled.
+ *
+ * This is a readiness check of the sample document the make-journey edits, the
+ * real SFI/SITI processing guide. The findings deliberately reflect what makes
+ * processing guidance hard to follow and hard for the find-and-use assistant to
+ * search: references to other guides that are not links, screenshots with no
+ * alt text, and unexpanded acronyms.
  */
 
 /** @type {import('./analyse.js').AnalyseResponse} */
 const mockAnalysisData = {
   verdict: 'not_ready',
   summary:
-    'This document has several clarity and completeness issues that should be addressed before publishing. The structure is good, but key sections lack sufficient detail and some wording is ambiguous.',
-  document_title: 'Subsidy application process',
+    'This processing guide is well structured, but a few issues would make it hard to follow, and hard to search, before it is published. References to other guides are not links, screenshots have no alt text, and acronyms are not expanded.',
+  document_title: 'Parcel ID not linked to SBI in SITI Tenure (SFI23)',
   findings: [
     {
-      category: 'Clarity',
-      section: '2.1, Application overview',
-      severity: 'high',
-      issue: 'Ambiguous definition of "eligible costs"',
-      why_it_matters:
-        'Users may misunderstand which expenses qualify, leading to incorrect applications and processing delays.',
-      recommendation:
-        'Provide a detailed, itemised list of eligible and ineligible cost categories with clear examples.'
-    },
-    {
-      category: 'Clarity',
-      section: '3.2, Supporting documents',
-      severity: 'medium',
-      issue: 'Vague acceptance criteria for uploaded files',
-      why_it_matters:
-        'Users cannot determine if their documents meet the requirements, causing rejections.',
-      recommendation:
-        'Specify exact file formats, size limits, resolution (for scans), and required metadata.'
-    },
-    {
       category: 'Completeness',
-      section: '4.0, Appeals process',
+      section: 'Throughout the guide',
       severity: 'critical',
-      issue: 'Appeals process section is missing entirely',
+      issue: 'References to other guides are not links',
       why_it_matters:
-        'Users will not know how to challenge a decision they disagree with.',
+        'The procedure depends on dozens of references to other guides, for example the SITI Agri Basic Navigation guide. None are links, so an officer cannot follow a step without already knowing where each guide and section is.',
       recommendation:
-        'Add a comprehensive section covering appeal timelines, grounds, and escalation steps.'
+        'Make every reference to another guide or section a working link.'
+    },
+    {
+      category: 'Accessibility',
+      section: 'Throughout the guide',
+      severity: 'high',
+      issue: 'Screenshots have no descriptive alt text',
+      why_it_matters:
+        'The 14 screenshots are labelled only "system screen for this step". Officers using a screen reader, and the find-and-use assistant, cannot tell what each one shows, so those steps cannot be followed.',
+      recommendation:
+        'Give each screenshot specific alt text describing what to look at and what to do on the screen.'
+    },
+    {
+      category: 'Clarity',
+      section: 'Throughout the guide',
+      severity: 'high',
+      issue: 'Acronyms are not expanded on first use',
+      why_it_matters:
+        'SBI, LPIS, JMS, CRM, PLCD, FRN, RLE1 and ORT appear without definition. A new processor, and the assistant answering a question, cannot reliably resolve them.',
+      recommendation:
+        'Expand each acronym on first use, or add a short terms list at the top of the guide.'
     },
     {
       category: 'Completeness',
-      section: '2.3, Eligibility criteria',
+      section: 'Check CRM',
       severity: 'high',
-      issue:
-        'Does not address cross-compliance requirements for environmental regulations',
+      issue: 'Some decision branches do not state the next step',
       why_it_matters:
-        'Users may submit applications that do not qualify, leading to rejected claims and extra work to put right.',
+        'A few Yes and No branches end without telling the officer which section to go to next, so an investigation can stall mid-case.',
       recommendation:
-        'Reference relevant environmental and land management compliance requirements.'
+        'End every branch with an explicit next step or a link to the section that follows.'
     },
     {
       category: 'Consistency',
-      section: '1.1, Introduction',
-      severity: 'low',
-      issue: 'Department name and abbreviation changed between sections',
+      section: 'Multiple headings',
+      severity: 'medium',
+      issue: 'Headings are styled inconsistently',
       why_it_matters:
-        'Minor inconsistency may confuse users about which department to contact.',
+        'Some headings end in a full stop, for example "Check Old link.", and they mix title case with sentence case. This reads untidily and produces an inconsistent contents page.',
       recommendation:
-        'Standardise department names throughout (for example, always use "RPA" or "Rural Payments Agency", not both).'
+        'Use sentence case with no trailing full stop for every heading.'
     },
     {
-      category: 'Accuracy',
-      section: '5.1, Contact information',
+      category: 'Clarity',
+      section: 'Learner checks',
       severity: 'medium',
-      issue: 'Email address format appears incorrect (missing domain)',
+      issue: 'A referenced section name does not match its heading',
       why_it_matters:
-        'Users cannot contact support if the email address is invalid.',
+        'Branches refer to a "Learner check" section, but the heading is "Learner checks", so officers may not be sure they are in the right place.',
       recommendation:
-        'Verify and update the email address to ensure it is correct and monitored.'
+        'Make every in-text section reference match the actual heading exactly.'
+    },
+    {
+      category: 'Consistency',
+      section: 'Multiple sections',
+      severity: 'low',
+      issue: 'Hold codes are repeated without a single reference',
+      why_it_matters:
+        'HOLD972, HOLD963, HOLD925 and HOLD927 appear in different places with slightly different note wording, so an officer could apply the wrong note.',
+      recommendation:
+        'Add one table of hold codes with their standard notes, and refer to it.'
     }
   ],
   good_points: [
-    'Document structure is logical and easy to navigate with clear section headings',
-    'Step-by-step instructions are well formatted and easy to follow',
-    'Visual diagrams clearly illustrate the application workflow',
-    'Timeline expectations are clearly stated (for example, "Applications processed within 5 working days")',
-    'Common questions are well organised and address user pain points'
+    'The procedure is broken into clear, numbered investigation stages with a contents page',
+    'Decision points consistently use a question followed by Yes and No branches',
+    'Escalation routes (Team Leader, Operations Resolution Team, GI Operations) are spelled out, with the hold code to apply at each',
+    'A standard case-note template is given for every contact and hold',
+    'Screenshots are placed at the step where the officer needs them'
   ],
   usage: {
-    input_tokens: 2847,
-    output_tokens: 1203
+    input_tokens: 4120,
+    output_tokens: 1486
   }
 }
 

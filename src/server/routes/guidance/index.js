@@ -1,17 +1,40 @@
 import {
   getStartController,
+  getWhatController,
+  postWhatController,
+  getLibraryController,
+  openGuideController,
+  getGuideDetailController,
+  postRequestAccessController,
   getTaskListController,
   getNeedController,
-  postNeedController,
+  postNeedUploadController,
+  postNeedDocAddController,
+  postNeedDocDeleteController,
+  getNeedRestartController,
+  getNeedDetailsController,
+  postNeedDetailsController,
+  getNeedExistingController,
+  postNeedExistingController,
+  getNeedReviewController,
+  postNeedReviewController,
   getUploadController,
   postUploadController,
+  postDraftDocAddController,
+  postDraftDocDeleteController,
   getConvertedController,
-  getEditController,
-  postEditController,
+  getConfirmSectionsController,
+  postConfirmSectionsController,
+  getGuideEditorController,
+  postGuideEditorController,
   getReviewController,
   postReviewController,
+  getChangesController,
+  getPublishedGuideController,
   getTestController,
   postTestController,
+  getScenarioFormController,
+  postScenarioFormController,
   getCheckController,
   getCheckIssueController,
   postCheckIssueController,
@@ -25,8 +48,18 @@ import {
 // trips the limit. The handler validates the file; this is just a backstop.
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
+// Shared payload config for the routes that accept an uploaded Word document.
+const uploadOptions = {
+  payload: {
+    multipart: { output: 'stream' },
+    parse: true,
+    allow: 'multipart/form-data',
+    maxBytes: MAX_UPLOAD_BYTES
+  }
+}
+
 /**
- * Sets up the routes for the make and publish guidance journey.
+ * Sets up the routes for the make, find and use guidance journey.
  * These routes are registered in src/server/plugins/router.js.
  */
 export const guidance = {
@@ -34,43 +67,100 @@ export const guidance = {
     name: 'guidance',
     register(server) {
       server.route([
+        { method: 'GET', path: '/guidance/start', ...getStartController },
+        { method: 'GET', path: '/guidance/what', ...getWhatController },
+        { method: 'POST', path: '/guidance/what', ...postWhatController },
+        { method: 'GET', path: '/guidance/library', ...getLibraryController },
         {
           method: 'GET',
-          path: '/guidance/start',
-          ...getStartController
+          path: '/guidance/library/open/{id}',
+          ...openGuideController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/library/{id}',
+          ...getGuideDetailController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/library/{id}/request-access',
+          ...postRequestAccessController
         },
         {
           method: 'GET',
           path: '/guidance/task-list',
           ...getTaskListController
         },
+        { method: 'GET', path: '/guidance/need', ...getNeedController },
         {
-          method: 'GET',
-          path: '/guidance/need',
-          ...getNeedController
+          method: 'POST',
+          path: '/guidance/need/upload',
+          options: uploadOptions,
+          ...postNeedUploadController
         },
         {
           method: 'POST',
-          path: '/guidance/need',
-          ...postNeedController
-        },
-        {
-          method: 'GET',
-          path: '/guidance/upload',
-          ...getUploadController
+          path: '/guidance/need/documents/add',
+          options: uploadOptions,
+          ...postNeedDocAddController
         },
         {
           method: 'POST',
+          path: '/guidance/need/documents/delete',
+          ...postNeedDocDeleteController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/need/restart',
+          ...getNeedRestartController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/need/details',
+          ...getNeedDetailsController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/need/details',
+          ...postNeedDetailsController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/need/existing',
+          ...getNeedExistingController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/need/existing',
+          ...postNeedExistingController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/need/review',
+          ...getNeedReviewController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/need/review',
+          ...postNeedReviewController
+        },
+        { method: 'GET', path: '/guidance/upload', ...getUploadController },
+        {
+          method: 'POST',
           path: '/guidance/upload',
-          options: {
-            payload: {
-              multipart: { output: 'stream' },
-              parse: true,
-              allow: 'multipart/form-data',
-              maxBytes: MAX_UPLOAD_BYTES
-            }
-          },
+          options: uploadOptions,
           ...postUploadController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/upload/documents/add',
+          options: uploadOptions,
+          ...postDraftDocAddController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/upload/documents/delete',
+          ...postDraftDocDeleteController
         },
         {
           method: 'GET',
@@ -79,39 +169,45 @@ export const guidance = {
         },
         {
           method: 'GET',
-          path: '/guidance/edit',
-          ...getEditController
+          path: '/guidance/confirm-sections',
+          ...getConfirmSectionsController
         },
         {
           method: 'POST',
-          path: '/guidance/edit',
-          ...postEditController
+          path: '/guidance/confirm-sections',
+          ...postConfirmSectionsController
         },
         {
           method: 'GET',
-          path: '/guidance/review',
-          ...getReviewController
+          path: '/guidance/sections',
+          ...getGuideEditorController
         },
         {
           method: 'POST',
-          path: '/guidance/review',
-          ...postReviewController
+          path: '/guidance/sections',
+          ...postGuideEditorController
         },
+        { method: 'GET', path: '/guidance/review', ...getReviewController },
+        { method: 'POST', path: '/guidance/review', ...postReviewController },
+        { method: 'GET', path: '/guidance/changes', ...getChangesController },
         {
           method: 'GET',
-          path: '/guidance/test',
-          ...getTestController
+          path: '/guidance/published/{id}',
+          ...getPublishedGuideController
+        },
+        { method: 'GET', path: '/guidance/test', ...getTestController },
+        { method: 'POST', path: '/guidance/test', ...postTestController },
+        {
+          method: 'GET',
+          path: '/guidance/test/scenario/{id}',
+          ...getScenarioFormController
         },
         {
           method: 'POST',
-          path: '/guidance/test',
-          ...postTestController
+          path: '/guidance/test/scenario/{id}',
+          ...postScenarioFormController
         },
-        {
-          method: 'GET',
-          path: '/guidance/check',
-          ...getCheckController
-        },
+        { method: 'GET', path: '/guidance/check', ...getCheckController },
         {
           method: 'GET',
           path: '/guidance/check/issues/{index}',

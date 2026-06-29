@@ -24,7 +24,7 @@ const HEADINGS = {
   6: { tag: 'h6', className: 'govuk-heading-s' }
 }
 
-const LIST_ITEM = /^\s*([-*+]|\d+\.)\s+(.*)$/
+const LIST_ITEM = /^(\s*)([-*+]|\d+\.)\s+(.*)$/
 const HEADING = /^(#{1,6})\s+(.*)$/
 const RULE = /^(-{3,}|\*{3,}|_{3,})$/
 
@@ -67,6 +67,11 @@ function applyInline(text) {
 
   html = html
     .replace(
+      /!\[([^\]]*)\]\(([^)\s]+)\)/g,
+      (match, alt, file) =>
+        `<span class="app-image-placeholder" data-file="${file}" data-alt="${alt}">Image${alt ? ': ' + alt : ''}</span>`
+    )
+    .replace(
       /\[([^\]]+)\]\(([^)\s]+)\)/g,
       (match, label, url) =>
         `<a class="govuk-link" href="${safeHref(url)}">${label}</a>`
@@ -81,17 +86,44 @@ function applyInline(text) {
   )
 }
 
+function listItemInfo(line) {
+  const match = LIST_ITEM.exec(line)
+  if (!match) {
+    return null
+  }
+  return {
+    indent: match[1].replace(/\t/g, '  ').length,
+    ordered: /\d+\./.test(match[2]),
+    text: match[3].trim()
+  }
+}
+
+// Render a list, nesting any deeper-indented items inside the item above them.
+// Processing guidance routes on nested Yes/No branches (a Yes/No under a Yes/No),
+// so the nesting has to survive or the reader cannot tell which answer is which.
 function renderList(lines, start) {
-  const ordered = /\d+\./.test(LIST_ITEM.exec(lines[start])[1])
+  return renderListLevel(lines, start, listItemInfo(lines[start]).indent)
+}
+
+function renderListLevel(lines, start, indent) {
+  const ordered = listItemInfo(lines[start]).ordered
   const items = []
   let i = start
 
   while (i < lines.length) {
-    const match = LIST_ITEM.exec(lines[i])
-    if (!match || /\d+\./.test(match[1]) !== ordered) {
+    const info = listItemInfo(lines[i])
+    if (!info || info.indent < indent) {
       break
     }
-    items.push(`<li>${applyInline(match[2].trim())}</li>`)
+    if (info.indent > indent) {
+      const nested = renderListLevel(lines, i, info.indent)
+      if (items.length > 0) {
+        items[items.length - 1] += nested.html
+      }
+      i = nested.next
+      continue
+    }
+    items.push(`<li>${applyInline(info.text)}`)
     i++
   }
 
@@ -99,8 +131,93 @@ function renderList(lines, start) {
   const className = ordered
     ? 'govuk-list govuk-list--number'
     : 'govuk-list govuk-list--bullet'
+  const html = `<${tag} class="${className}">${items.map((item) => `${item}</li>`).join('')}</${tag}>`
+  return { html, next: i }
+}
+
+const TABLE_LINE = /^\s*\|.*\|\s*$/
+
+function splitTableRow(line) {
+  let text = line.trim()
+  if (text.startsWith('|')) text = text.slice(1)
+  if (text.endsWith('|')) text = text.slice(0, -1)
+  return text.split('|').map((cell) => cell.trim())
+}
+
+function isSeparatorRow(line) {
+  if (!TABLE_LINE.test(line)) {
+    return false
+  }
+  const cells = splitTableRow(line)
+  return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell))
+}
+
+function isTableStart(lines, i) {
+  return TABLE_LINE.test(lines[i] || '') && isSeparatorRow(lines[i + 1] || '')
+}
+
+// A GitHub-style pipe table. Word tables convert to these, and processing
+// guidance leans on them, so a rectangular grid is rendered. Rows are padded to
+// the widest, so a source table with merged cells still renders cleanly.
+function renderTable(lines, start) {
+  const rows = [splitTableRow(lines[start])]
+  let i = start + 2
+
+  while (
+    i < lines.length &&
+    TABLE_LINE.test(lines[i]) &&
+    !isSeparatorRow(lines[i])
+  ) {
+    rows.push(splitTableRow(lines[i]))
+    i++
+  }
+
+  // The header row defines the column count, so a body row with stray extra
+  // cells cannot inject empty, unlabelled header cells.
+  const columns = rows[0].length
+  const fit = (row) =>
+    row
+      .slice(0, columns)
+      .concat(Array(Math.max(0, columns - row.length)).fill(''))
+  const header = fit(rows[0])
+  const body = rows.slice(1).map(fit)
+
+  const head = header
+    .map(
+      (cell) =>
+        `<th scope="col" class="govuk-table__header">${applyInline(cell)}</th>`
+    )
+    .join('')
+  const rowsHtml = body
+    .map(
+      (row) =>
+        `<tr class="govuk-table__row">${row
+          .map(
+            (cell) => `<td class="govuk-table__cell">${applyInline(cell)}</td>`
+          )
+          .join('')}</tr>`
+    )
+    .join('')
+
   return {
-    html: `<${tag} class="${className}">${items.join('')}</${tag}>`,
+    html: `<table class="govuk-table"><thead class="govuk-table__head"><tr class="govuk-table__row">${head}</tr></thead><tbody class="govuk-table__body">${rowsHtml}</tbody></table>`,
+    next: i
+  }
+}
+
+// A blockquote block, used for the boxed case-note and hold templates that
+// processing guidance tells officers to copy. Rendered as a GOV.UK inset so it
+// reads as a distinct, copyable block. The markers arrive HTML-escaped
+// (">" becomes "&gt;"), because the whole input is escaped before parsing.
+function renderBlockquote(lines, start) {
+  const items = []
+  let i = start
+  while (i < lines.length && lines[i].startsWith('&gt;')) {
+    items.push(applyInline(lines[i].replace(/^&gt;\s?/, '').trim()))
+    i++
+  }
+  return {
+    html: `<div class="govuk-inset-text">${items.join('<br>')}</div>`,
     next: i
   }
 }
@@ -115,7 +232,9 @@ function renderParagraph(lines, start) {
       line.trim() === '' ||
       HEADING.test(line) ||
       LIST_ITEM.test(line) ||
-      RULE.test(line.trim())
+      RULE.test(line.trim()) ||
+      isTableStart(lines, i) ||
+      line.startsWith('&gt;')
     if (isBlock) {
       break
     }
@@ -154,6 +273,14 @@ function renderMarkdown(src) {
         '<hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">'
       )
       i++
+    } else if (isTableStart(lines, i)) {
+      const { html, next } = renderTable(lines, i)
+      blocks.push(html)
+      i = next
+    } else if (line.startsWith('&gt;')) {
+      const { html, next } = renderBlockquote(lines, i)
+      blocks.push(html)
+      i = next
     } else if (HEADING.test(line)) {
       const [, hashes, text] = HEADING.exec(line)
       const { tag, className } = HEADINGS[hashes.length]
@@ -175,4 +302,52 @@ function renderMarkdown(src) {
   return blocks.join('\n')
 }
 
-export { renderMarkdown }
+// Swap uploaded screenshots into rendered HTML. Each placeholder carries its
+// source filename; where an image has been uploaded for that filename the
+// placeholder becomes a real image. Run after renderMarkdown, server-side.
+function applyImages(html, images) {
+  if (!images) {
+    return html
+  }
+  return html.replace(
+    /<span class="app-image-placeholder" data-file="([^"]+)" data-alt="([^"]*)">[^<]*<\/span>/g,
+    (match, file, alt) => {
+      const src = images[file]
+      return src
+        ? `<img class="app-screenshot" src="${src}" alt="${alt}">`
+        : match
+    }
+  )
+}
+
+// Slugify a heading into a stable anchor id. Used by both the editor preview and
+// the contents side-nav so links resolve to the same headings on every render.
+function slugify(text) {
+  return String(text)
+    .toLowerCase()
+    .replace(/<[^>]+>/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// Add id attributes to the section-level headings (h2, h3, h4) of rendered HTML,
+// so the contents side-nav can scroll the preview to a section. This matches the
+// outline depth: document heading levels 1 to 3. Collision-safe: a repeated
+// heading gets -2, -3 and so on, in document order.
+function addHeadingIds(html) {
+  const seen = new Map()
+  return html.replace(
+    /<(h2|h3|h4)([^>]*)>([\s\S]*?)<\/\1>/g,
+    (match, tag, attrs, inner) => {
+      let slug = slugify(inner) || 'section'
+      const count = seen.get(slug) ?? 0
+      seen.set(slug, count + 1)
+      if (count > 0) {
+        slug = slug + '-' + (count + 1)
+      }
+      return `<${tag}${attrs} id="${slug}">${inner}</${tag}>`
+    }
+  )
+}
+
+export { renderMarkdown, applyImages, slugify, addHeadingIds }

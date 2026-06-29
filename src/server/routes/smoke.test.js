@@ -18,7 +18,7 @@ describe('route smoke tests', () => {
   // Entry routes: must render their page.
   const entryPages = [
     { url: '/', contains: 'Make, find and use guidance' },
-    { url: '/guidance/start', contains: 'guidance' },
+    { url: '/guidance/library', contains: 'Guides' },
     { url: '/demand/sign-in' },
     { url: '/find-funding/start' },
     { url: '/cookies' },
@@ -39,12 +39,17 @@ describe('route smoke tests', () => {
   // Deep make-journey GET routes: with no session they either render or
   // redirect, but must never crash (a Nunjucks render error surfaces as a 500).
   const deepGuidancePages = [
+    '/guidance/start',
+    '/guidance/what',
     '/guidance/task-list',
     '/guidance/need',
+    '/guidance/need/details',
+    '/guidance/need/review',
     '/guidance/upload',
     '/guidance/converted',
-    '/guidance/edit',
+    '/guidance/sections',
     '/guidance/review',
+    '/guidance/changes',
     '/guidance/test',
     '/guidance/check',
     '/guidance/check/issues/0',

@@ -32,13 +32,28 @@
 }
 
 .app-markdown-preview {
-  height: 32rem;
+  height: calc(100vh - 23rem);
+  min-height: 28rem;
   overflow-y: auto;
   box-sizing: border-box;
   padding: govuk-spacing(3);
   border: 1px solid colours.$govuk-mid-grey;
   background-color: govuk-colour('white');
   overflow-wrap: break-word;
+
+  // Cap the rendered text to a readable measure (around 60-75 characters);
+  // tables and image placeholders stay full width.
+  > p,
+  > ul,
+  > ol,
+  > h2,
+  > h3,
+  > h4,
+  > h5,
+  > h6,
+  > .govuk-inset-text {
+    max-width: 46em;
+  }
 
   // The rendered guidance already carries GOV.UK spacing; just tidy the edges
   // so the panel does not gain a double margin at the top or bottom.
@@ -76,4 +91,563 @@
   font-size: 0.875em;
   padding: 0 govuk-spacing(1);
   background-color: colours.$govuk-light-grey;
+}
+
+// Images are not hosted in the prototype, so the preview shows a labelled
+// placeholder rather than a broken image, keeping the structure honest.
+.app-image-placeholder {
+  display: block;
+  margin: govuk-spacing(3) 0;
+  padding: govuk-spacing(3);
+  border: 2px dashed colours.$govuk-mid-grey;
+  background-color: colours.$govuk-light-grey;
+  color: #505a5f;
+  font-style: italic;
+}
+
+// In the preview, show the image's filename after its description so an author
+// can see which screenshot belongs where.
+.app-image-placeholder[data-file]::after {
+  content: " (" attr(data-file) ")";
+  font-style: normal;
+  font-size: 0.875rem;
+}
+
+// The list of sections on the draft hub: a thin rule above each item.
+.app-section-list {
+  margin-top: govuk-spacing(4);
+  margin-bottom: govuk-spacing(6);
+  border-bottom: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-section-list__item {
+  margin-bottom: 0;
+  padding-top: govuk-spacing(3);
+  padding-bottom: govuk-spacing(3);
+  border-top: 1px solid colours.$govuk-mid-grey;
+}
+
+// Sub-headings (level 4 and deeper) shown under a section in the draft outline,
+// for orientation only; they are edited as markdown inside the section body.
+.app-subheading {
+  color: #505a5f;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  padding-top: govuk-spacing(1);
+}
+
+// Indentation for the nested section outline and hub.
+.app-indent-1 {
+  padding-left: 20px;
+}
+
+.app-indent-2 {
+  padding-left: 40px;
+}
+
+.app-indent-3 {
+  padding-left: 60px;
+}
+
+// Uploaded screenshots: shown in the preview, review and published views in
+// place of the placeholder, and as thumbnails in the section upload area.
+.app-screenshot {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: govuk-spacing(2) 0;
+  border: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-screenshot--thumb {
+  max-width: 240px;
+  margin-bottom: govuk-spacing(1);
+}
+
+.app-image-upload {
+  padding-top: govuk-spacing(3);
+  margin-bottom: govuk-spacing(3);
+  border-top: 1px solid colours.$govuk-light-grey;
+}
+
+// The repository: a status filter and a list of guides to update.
+.app-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(3);
+  margin-bottom: govuk-spacing(5);
+}
+
+.app-filter-list__item {
+  margin-bottom: 0;
+}
+
+.app-guide-list {
+  margin-bottom: govuk-spacing(6);
+  border-bottom: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-guide-list__item {
+  margin-bottom: 0;
+  padding-top: govuk-spacing(3);
+  padding-bottom: govuk-spacing(3);
+  border-top: 1px solid colours.$govuk-mid-grey;
+}
+
+// "Add another" file list: each added document on its own row, with a Remove
+// button. Used on the phase-1 context upload and the phase-2 draft upload.
+.app-doc-list {
+  margin-bottom: govuk-spacing(4);
+}
+
+.app-doc-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+  margin-bottom: 0;
+  padding: govuk-spacing(2) 0;
+  border-top: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-doc-list__item:last-child {
+  border-bottom: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-doc-list__name {
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.app-doc-list__remove {
+  margin-bottom: 0;
+}
+
+// ── The whole-guide editor (phase 2) ────────────────────────────────────────
+// One wide body editor (the Whitehall / Content Publisher model: a textarea
+// with Write/Preview tabs and an inline formatting guide), with a collapsible
+// contents nav on the left for navigating very long RPA documents.
+.app-guide-editor__layout {
+  @include govuk-media-query($from: desktop) {
+    display: flex;
+    gap: govuk-spacing(5);
+    align-items: flex-start;
+  }
+}
+
+.app-guide-editor__contents {
+  margin-bottom: govuk-spacing(4);
+
+  @include govuk-media-query($from: desktop) {
+    flex: 0 0 220px;
+    margin-bottom: 0;
+    position: sticky;
+    top: govuk-spacing(3);
+    // Stay in view and scroll within itself if the contents is very long.
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+  }
+}
+
+.app-guide-editor__contents-title {
+  margin-bottom: govuk-spacing(2);
+}
+
+.app-guide-editor__main {
+  @include govuk-media-query($from: desktop) {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.app-guide-editor__input {
+  // Use the screen's vertical space: taller on big screens, still usable on
+  // small ones. The textarea can also be dragged taller (resize: vertical).
+  height: calc(100vh - 23rem);
+  min-height: 28rem;
+}
+
+// "Hide contents" / "Show contents": a text disclosure (the GOV.UK Accordion
+// Show/Hide wording), left-aligned and nested directly under the Contents
+// heading, styled like a link so it reads as a control, not a list item.
+.app-toggle {
+  display: inline-block;
+  margin: 0 0 govuk-spacing(3);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $govuk-link-colour;
+  font-size: 0.9375rem;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: $govuk-link-hover-colour;
+  }
+
+  &:focus {
+    outline: 3px solid transparent;
+    color: govuk-colour('black');
+    background-color: $govuk-focus-colour;
+    box-shadow: 0 -2px $govuk-focus-colour, 0 4px govuk-colour('black');
+    text-decoration: none;
+  }
+}
+
+// Keep the hidden attribute winning over the inline-block display above.
+.app-toggle[hidden] {
+  display: none;
+}
+
+.app-guide-editor__show-contents {
+  margin-bottom: govuk-spacing(3);
+}
+
+// Contents list, styled like a side navigation: a left rule that fills on hover
+// and focus.
+.app-contents {
+  margin-bottom: 0;
+  border-left: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-contents__item {
+  margin-bottom: 0;
+}
+
+.app-contents__link {
+  display: block;
+  padding: govuk-spacing(1) govuk-spacing(2);
+  margin-left: -1px;
+  border-left: 4px solid transparent;
+  text-decoration: none;
+
+  &:hover {
+    border-left-color: colours.$govuk-mid-grey;
+  }
+
+  &:focus {
+    border-left-color: $govuk-focus-colour;
+  }
+}
+
+.app-contents__item--sub .app-contents__link {
+  padding-left: govuk-spacing(4);
+  font-size: 0.9375rem;
+}
+
+.app-contents__item--sub2 .app-contents__link {
+  padding-left: govuk-spacing(6);
+  font-size: 0.9375rem;
+}
+
+// Version diff: removed lines red, added lines green, with a marker and a
+// visually-hidden label so the change is never conveyed by colour alone.
+.app-diff {
+  margin-bottom: govuk-spacing(6);
+}
+
+.app-diff__line {
+  margin: 0 0 2px;
+  padding: govuk-spacing(1) govuk-spacing(2);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.app-diff__line--removed {
+  background-color: #fce8e6;
+  border-left: 4px solid govuk-colour('red');
+}
+
+.app-diff__line--removed::before {
+  content: "\2212  ";
+  font-weight: 700;
+}
+
+.app-diff__line--added {
+  background-color: #e9f3ec;
+  border-left: 4px solid govuk-colour('green');
+}
+
+.app-diff__line--added::before {
+  content: "+  ";
+  font-weight: 700;
+}
+
+.app-diff__gap {
+  margin: 0 0 2px;
+  padding: govuk-spacing(1) govuk-spacing(2);
+  color: #505a5f;
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+// AI assist: a labelled touchpoint on each phase showing the blueprint's AI
+// opportunity, tagged Available now or Coming later.
+.app-ai-assist {
+  margin-bottom: govuk-spacing(5);
+  padding: govuk-spacing(3);
+  background-color: colours.$govuk-light-grey;
+  border-left: 5px solid colours.$defra-green;
+}
+
+.app-ai-assist__heading {
+  margin-bottom: govuk-spacing(2);
+}
+
+.app-ai-assist__label {
+  font-weight: 700;
+  margin-right: govuk-spacing(2);
+}
+
+.app-ai-assist__status {
+  display: inline-block;
+  padding: 0 govuk-spacing(2);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.app-ai-assist__status--now {
+  color: #005a30;
+  background-color: #cce2d8;
+}
+
+.app-ai-assist__status--later {
+  color: #1d2429;
+  background-color: #eeefef;
+}
+
+// ── The guide library (finder / MOJ case-list) ──────────────────────────────
+// A full-width search, collapsible status and scheme facets, and a sortable
+// table of guides with pagination , built to hold the 100+ documents that come
+// off the SharePoint site.
+
+// The library list and detail run wider than the 960px reading column: a data
+// table is scanned in two dimensions, so it has no reading measure to protect,
+// and the extra width lets all five columns sit without cramping. Only these
+// pages opt in (via bodyClasses on the page), so the prose and form journey
+// keeps the standard measure. Widening the whole shell (header, nav, content,
+// footer all use .govuk-width-container) keeps everything aligned.
+.app-wide-page .govuk-width-container {
+  max-width: 1140px;
+}
+
+// Search with an inline button. Capped so it stays a comfortable search width
+// on the wide shell rather than stretching the full 1140px; left-aligned with
+// the filters and table below it.
+.app-library__search {
+  display: flex;
+  align-items: flex-end;
+  gap: govuk-spacing(2);
+  max-width: 720px;
+  margin-bottom: govuk-spacing(3);
+}
+
+.app-library__search-group {
+  flex: 1 1 auto;
+  margin-bottom: 0;
+}
+
+.app-library__toolbar {
+  margin-bottom: govuk-spacing(3);
+}
+
+.app-library__filter-col {
+  margin-bottom: govuk-spacing(4);
+
+  @include govuk-media-query($from: desktop) {
+    margin-bottom: 0;
+  }
+}
+
+.app-library__filter-col .govuk-form-group {
+  margin-bottom: govuk-spacing(4);
+}
+
+.app-library__filter-actions {
+  padding-top: govuk-spacing(1);
+}
+
+// Collapsing the filters gives the table the full width.
+.app-library--filters-hidden .app-library__filter-col {
+  display: none;
+}
+
+.app-library--filters-hidden .app-library__results-col {
+  width: 100%;
+}
+
+// Selected-filter tags (MOJ): each one removable.
+.app-library__selected {
+  margin-bottom: govuk-spacing(3);
+}
+
+.app-library__tags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-library__tags li {
+  display: inline-block;
+  margin: 0 govuk-spacing(2) govuk-spacing(2) 0;
+}
+
+.app-filter-tag {
+  display: inline-block;
+  padding: 0 govuk-spacing(2);
+  font-size: 0.875rem;
+  color: $govuk-link-colour;
+  background-color: colours.$govuk-light-grey;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    color: govuk-colour('black');
+    background-color: $govuk-focus-colour;
+    box-shadow: 0 -2px $govuk-focus-colour, 0 4px govuk-colour('black');
+    outline: 3px solid transparent;
+  }
+}
+
+.app-library__results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+  margin-bottom: govuk-spacing(2);
+}
+
+.app-library__count {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.app-library__sort,
+.app-library__sort-label {
+  margin-bottom: 0;
+}
+
+.app-library__sort-label {
+  display: inline-block;
+  margin-right: govuk-spacing(1);
+}
+
+// The guide table. Fixed layout so the five columns fit the results column
+// exactly; a min-width keeps them readable, and the wrapper scrolls the table
+// (not the whole page) on narrow screens, which is the WCAG 1.4.10 reflow
+// exception for data tables. Plain GOV.UK table , no decorative row spine.
+.app-table-scroll {
+  overflow-x: auto;
+}
+
+.app-guide-table {
+  table-layout: fixed;
+  min-width: 760px;
+}
+
+.app-guide-table thead th:nth-child(1) {
+  width: 30%;
+}
+
+.app-guide-table thead th:nth-child(2) {
+  width: 16%;
+}
+
+.app-guide-table thead th:nth-child(3) {
+  width: 18%;
+}
+
+.app-guide-table thead th:nth-child(4) {
+  width: 20%;
+}
+
+.app-guide-table thead th:nth-child(5) {
+  width: 16%;
+}
+
+// Keep the status tag on one line.
+.app-guide-table .govuk-tag {
+  white-space: nowrap;
+}
+
+.app-guide-table__title {
+  overflow-wrap: break-word;
+}
+
+.app-guide-table__nowrap {
+  white-space: nowrap;
+}
+
+// Sortable column headers (MOJ sortable table): every header is a link that
+// carries a sort indicator , two triangles when it is sortable but inactive, a
+// single triangle for the active ascending / descending column (MOJ's own
+// arrow shapes). Sorting is server-side, so each header is a plain link: the
+// MOJ JS only reorders rows already in the DOM, which would break against
+// pagination.
+.app-sort-link {
+  display: inline-flex;
+  align-items: center;
+  color: $govuk-link-colour;
+  text-decoration: none;
+  font-weight: 700;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-left: govuk-spacing(1);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}
+
+[aria-sort="none"] .app-sort-link::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 22 22' fill='%231d70b8'%3E%3Cpath d='M8.1875 9.5L10.9609 3.95703L13.7344 9.5H8.1875Z'/%3E%3Cpath d='M13.7344 12.0781L10.9609 17.6211L8.1875 12.0781H13.7344Z'/%3E%3C/svg%3E");
+}
+
+[aria-sort="ascending"] .app-sort-link::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 22 22' fill='%231d70b8'%3E%3Cpath d='M6.5625 15.5L11 6.63125L15.4375 15.5H6.5625Z'/%3E%3C/svg%3E");
+}
+
+[aria-sort="descending"] .app-sort-link::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 22 22' fill='%231d70b8'%3E%3Cpath d='M15.4375 7L11 15.8687L6.5625 7L15.4375 7Z'/%3E%3C/svg%3E");
+}
+
+// The documents a guide was built from, listed on its detail page.
+.app-doc-listing {
+  margin-bottom: govuk-spacing(6);
+  border-bottom: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-doc-listing__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(2);
+  justify-content: space-between;
+  margin-bottom: 0;
+  padding: govuk-spacing(2) 0;
+  border-top: 1px solid colours.$govuk-mid-grey;
+}
+
+.app-doc-listing__name {
+  font-weight: 700;
+}
+
+.app-doc-listing__type {
+  color: #505a5f;
 }
