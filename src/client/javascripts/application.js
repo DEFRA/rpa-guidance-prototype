@@ -1,4 +1,5 @@
 import * as govukFrontend from 'govuk-frontend'
+import { MultiFileUpload } from '@ministryofjustice/frontend/moj/components/multi-file-upload/multi-file-upload.mjs'
 
 import {
   renderMarkdown,
@@ -7,6 +8,9 @@ import {
 } from '../../common/markdown.js'
 
 govukFrontend.initAll()
+// MOJ multi file upload is not a govuk-frontend component, so initialise it
+// separately. Config (upload and delete URLs) comes from data attributes.
+govukFrontend.createAll(MultiFileUpload)
 
 // Progressive enhancement: buttons that need JavaScript are hidden by default
 // and revealed only when this script runs, so there are no broken controls
