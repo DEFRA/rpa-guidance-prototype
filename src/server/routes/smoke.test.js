@@ -17,7 +17,7 @@ describe('route smoke tests', () => {
 
   // Entry routes: must render their page.
   const entryPages = [
-    { url: '/', contains: 'Make, find and use guidance' },
+    { url: '/', contains: 'Make and publish RPA guidance' },
     { url: '/guidance/library', contains: 'Guides' },
     { url: '/demand/sign-in' },
     { url: '/find-funding/start' },
@@ -47,6 +47,7 @@ describe('route smoke tests', () => {
     '/guidance/need/review',
     '/guidance/upload',
     '/guidance/converted',
+    '/guidance/example',
     '/guidance/sections',
     '/guidance/review',
     '/guidance/changes',

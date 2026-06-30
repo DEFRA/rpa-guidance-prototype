@@ -3,23 +3,19 @@
 {% from "govuk/components/textarea/macro.njk" import govukTextarea %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/details/macro.njk" import govukDetails %}
-{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% set page = 'guidance' %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      {% if flash %}
-        {{ govukNotificationBanner({
-          type: "success" if flash.success else undefined,
-          titleText: "Success" if flash.success else "Important",
-          text: flash.text
-        }) }}
-      {% endif %}
       <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
       <h1 class="govuk-heading-l">Draft the guide</h1>
       <p class="govuk-body">Edit the whole guide below. Use the contents to jump to a section, and the Preview tab to see how it will look when published.</p>
+      {% if flash %}
+        {{ govukInsetText({ text: flash.text }) }}
+      {% endif %}
     </div>
   </div>
 

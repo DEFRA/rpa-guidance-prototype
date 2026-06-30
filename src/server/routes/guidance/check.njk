@@ -2,6 +2,7 @@
 
 {% from "govuk/components/task-list/macro.njk" import govukTaskList %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
 {% set page = 'guidance' %}
 
@@ -9,33 +10,33 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
+      {% if flash %}
+        {{ govukNotificationBanner({ titleText: "Important", text: flash.text }) }}
+      {% endif %}
+
       <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
 
       {% if state == 'blocked' %}
+        <h1 class="govuk-heading-l">The check found issues to review</h1>
+        <p class="govuk-body">An AI check reviewed the guide against publishing standards and suggested a rewrite for each issue. You approve or reject each one. You must review {{ remaining }} essential {{ "issue" if remaining == 1 else "issues" }} before you can publish.</p>
+        <p class="govuk-body">You have reviewed {{ reviewedCount }} of {{ mustFixTotal }} essential {{ "issue" if mustFixTotal == 1 else "issues" }}.</p>
 
-        <h1 class="govuk-heading-l">The pre-publish check found things to fix</h1>
-        <p class="govuk-body">An AI check reviewed the guide against publishing standards. You must make {{ remaining }} essential {{ "fix" if remaining == 1 else "fixes" }} before you can publish.</p>
-
-        <p class="govuk-body">You have fixed {{ fixedCount }} of {{ mustFixTotal }} essential {{ "issue" if mustFixTotal == 1 else "issues" }}.</p>
-
-        <h2 class="govuk-heading-m">Essential fixes</h2>
-        <p class="govuk-body">You cannot publish until these are fixed.</p>
-        {{ govukTaskList({ idPrefix: "issues-to-fix", items: mustFixItems }) }}
+        <h2 class="govuk-heading-m">Essential issues</h2>
+        <p class="govuk-body">You cannot publish until you have reviewed these.</p>
+        {{ govukTaskList({ idPrefix: "issues-to-review", items: mustFixItems }) }}
 
         <form method="post" action="/guidance/check/fix-all" novalidate>
-          {{ govukButton({ text: "I have made all the essential fixes", classes: "govuk-button--secondary" }) }}
+          {{ govukButton({ text: "Approve all essential suggestions", classes: "govuk-button--secondary" }) }}
         </form>
 
         {% if considerItems | length %}
           <h2 class="govuk-heading-m govuk-!-margin-top-4">Optional improvements</h2>
-          <p class="govuk-body">These do not block publishing. Make them if you can.</p>
+          <p class="govuk-body">These do not block publishing. Review them if you can.</p>
           {{ govukTaskList({ idPrefix: "improvements", items: considerItems }) }}
         {% endif %}
-
       {% else %}
-
-        <h1 class="govuk-heading-l">You have made the essential fixes</h1>
-        <p class="govuk-body">You can publish now, or make the optional improvements first.</p>
+        <h1 class="govuk-heading-l">You have reviewed the essential issues</h1>
+        <p class="govuk-body">You can publish now, or review the optional improvements first.</p>
 
         {% if considerItems | length %}
           <h2 class="govuk-heading-m">Optional improvements</h2>
@@ -45,17 +46,12 @@
 
         {% if mustFixItems | length %}
           <details class="govuk-details">
-            <summary class="govuk-details__summary">
-              <span class="govuk-details__summary-text">Review the essential fixes you made</span>
-            </summary>
-            <div class="govuk-details__text">
-              {{ govukTaskList({ idPrefix: "made", items: mustFixItems }) }}
-            </div>
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Review the essential issues you decided</span></summary>
+            <div class="govuk-details__text">{{ govukTaskList({ idPrefix: "decided", items: mustFixItems }) }}</div>
           </details>
         {% endif %}
 
         {{ govukButton({ text: "Continue to publish", href: "/guidance/check/publish" }) }}
-
       {% endif %}
 
     </div>

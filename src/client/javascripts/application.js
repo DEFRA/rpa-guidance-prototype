@@ -265,7 +265,9 @@ if (guideLibrary) {
   )
 
   if (applyButton) {
-    applyButton.hidden = true
+    // Filters auto-apply on change with JS on, so the button is redundant.
+    // Remove it rather than set .hidden, which govuk-button's display overrides.
+    applyButton.remove()
   }
   if (sortSelect) {
     sortSelect.addEventListener('change', () => guideLibrary.submit())

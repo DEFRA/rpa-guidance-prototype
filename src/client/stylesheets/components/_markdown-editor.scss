@@ -651,3 +651,94 @@
 .app-doc-listing__type {
   color: #505a5f;
 }
+
+// ── A guide shown as Word, then markdown, then published (the example page) ──
+.app-doc-states__step {
+  margin-bottom: govuk-spacing(7);
+}
+
+.app-doc-states__word {
+  border: 1px solid colours.$govuk-mid-grey;
+  background-color: colours.$govuk-white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-doc-states__filename {
+  margin: 0;
+  padding: govuk-spacing(2) govuk-spacing(3);
+  border-bottom: 1px solid colours.$govuk-mid-grey;
+  background-color: colours.$govuk-light-grey;
+  font-size: 0.875rem;
+  color: #505a5f;
+}
+
+.app-doc-states__word-body {
+  padding: govuk-spacing(3) govuk-spacing(4);
+  font-family: Georgia, "Times New Roman", serif;
+
+  h2 {
+    margin: 0 0 govuk-spacing(2);
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  p,
+  ul,
+  ol {
+    margin: 0 0 govuk-spacing(3);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  ul,
+  ol {
+    padding-left: govuk-spacing(5);
+  }
+}
+
+.app-doc-states__markdown {
+  margin: 0;
+  padding: govuk-spacing(3);
+  border: 1px solid colours.$govuk-mid-grey;
+  background-color: colours.$govuk-light-grey;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+
+  code {
+    font-family: inherit;
+  }
+}
+
+.app-doc-states__published {
+  padding: govuk-spacing(3) govuk-spacing(4);
+  border: 1px solid colours.$govuk-mid-grey;
+  border-left: 4px solid colours.$defra-green;
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// ── Pre-publish issue: AI-suggested rewrite (before / after) ────────────────
+.app-rewrite {
+  margin-bottom: govuk-spacing(6);
+}
+
+.app-rewrite__before,
+.app-rewrite__after {
+  margin-bottom: govuk-spacing(4);
+  padding: govuk-spacing(2) govuk-spacing(3);
+  border-left: 4px solid colours.$govuk-mid-grey;
+}
+
+.app-rewrite__before {
+  color: $govuk-secondary-text-colour;
+}
+
+.app-rewrite__after {
+  border-left-color: colours.$defra-green;
+  background-color: colours.$govuk-light-grey;
+}

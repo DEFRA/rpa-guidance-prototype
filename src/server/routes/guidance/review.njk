@@ -18,7 +18,7 @@
 
         <hr class="govuk-section-break govuk-section-break--visible govuk-section-break--l">
         <h2 class="govuk-heading-s">Prototype controls</h2>
-        {{ govukInsetText({ text: "In the real service the subject matter expert is a different person: a policy, technical or operational specialist. Simulate their decision here to continue the prototype." }) }}
+        {{ govukInsetText({ text: "In the real service someone else decides this: a policy, technical or operational specialist. Simulate it to continue." }) }}
         <form method="post" action="/guidance/review" novalidate>
           <div class="govuk-button-group">
             {{ govukButton({ text: "Simulate: subject matter expert approves", name: "action", value: "approve", classes: "govuk-button--secondary" }) }}

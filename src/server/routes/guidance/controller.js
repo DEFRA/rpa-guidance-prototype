@@ -10,12 +10,7 @@ import { splitIntoSections, subHeadingsOf } from '#/common/sections.js'
 import { mockAnalysisData } from './mock-analysis-data.js'
 import { mockDocuments } from './mock-documents-data.js'
 import { renderDiffHtml } from '#/common/diff.js'
-import { severityRank, isMustFix, formatSection } from './shared.js'
-import {
-  getFixedIssues,
-  setFixedIssue,
-  clearFixedIssues
-} from './fixed-issues.js'
+import { isMustFix, formatSection, severityRank } from './shared.js'
 
 // Session keys for the one document moving through the journey.
 const MARKDOWN_KEY = 'guidanceMarkdown'
@@ -33,8 +28,6 @@ const EDIT_GUIDE_KEY = 'guidanceEditGuide'
 // The published version of the guide being updated, kept so we can show a diff.
 const BASELINE_KEY = 'guidanceBaseline'
 
-// Namespaces the pre-publish check's "fixed" and "ready" state.
-const CHECK_ID = 'guidance'
 const CHECK_BASE = '/guidance/check'
 const HUB = '/guidance/task-list'
 
@@ -127,8 +120,37 @@ function buildHubItems(request) {
   })
 }
 
-// ── Pre-publish worklist helpers (shared with the publishing check) ─────────
-function buildTaskItems(findings, fixedIssues, wantMustFix) {
+// ── Pre-publish worklist helpers ─────────────────────────────────────────────
+// The AI readiness check finds issues, each with a suggested rewrite. For each,
+// the author approves the rewrite or rejects it; both resolve the issue. The
+// decision is kept per session, keyed by the issue's index in the findings.
+const DECISIONS_KEY = 'guidancePublishDecisions'
+
+function getDecisions(request) {
+  return request.yar?.get(DECISIONS_KEY) ?? {}
+}
+
+function setDecision(request, index, decision) {
+  const decisions = getDecisions(request)
+  decisions[index] = decision
+  request.yar?.set(DECISIONS_KEY, decisions)
+}
+
+function issueStatusTag(decision, wantMustFix) {
+  if (decision === 'approved') {
+    return { tag: { text: 'Approved', classes: 'govuk-tag--green' } }
+  }
+  if (decision === 'rejected') {
+    return { tag: { text: 'Rejected', classes: 'govuk-tag--grey' } }
+  }
+  return {
+    tag: wantMustFix
+      ? { text: 'To review', classes: 'govuk-tag--red' }
+      : { text: 'To review', classes: 'govuk-tag--blue' }
+  }
+}
+
+function buildTaskItems(findings, decisions, wantMustFix) {
   return findings
     .map((finding, index) => ({ finding, index }))
     .filter(({ finding }) => isMustFix(finding.severity) === wantMustFix)
@@ -140,19 +162,13 @@ function buildTaskItems(findings, fixedIssues, wantMustFix) {
       title: { text: finding.issue },
       hint: { text: formatSection(finding.section) },
       href: `${CHECK_BASE}/issues/${index}`,
-      status: fixedIssues.has(index)
-        ? { text: 'Fixed' }
-        : {
-            tag: wantMustFix
-              ? { text: 'Must fix', classes: 'govuk-tag--red' }
-              : { text: 'Optional', classes: 'govuk-tag--grey' }
-          }
+      status: issueStatusTag(decisions[index], wantMustFix)
     }))
 }
 
-function countBlockersRemaining(findings, fixedIssues) {
+function countBlockersRemaining(findings, decisions) {
   return findings.filter(
-    (finding, index) => isMustFix(finding.severity) && !fixedIssues.has(index)
+    (finding, index) => isMustFix(finding.severity) && !decisions[index]
   ).length
 }
 
@@ -173,10 +189,11 @@ function getStart(request, h) {
   request.yar?.clear?.(NEED_DOCS_KEY)
   request.yar?.clear?.(DRAFT_DOCS_KEY)
   uploadedImages.clear()
-  clearFixedIssues(request, CHECK_ID)
+  request.yar?.clear?.(DECISIONS_KEY)
 
-  // The home page is now the start page, so begin (or start over) there.
-  return h.redirect('/')
+  // Clear any previous run, then enter the make journey (the home page is a
+  // separate hub in this service, so do not loop back to it).
+  return h.redirect('/guidance/what')
 }
 
 // ── Choose: create a new guide, or update an existing one ───────────────────
@@ -206,7 +223,7 @@ function startFresh(request) {
   request.yar?.clear?.(NEED_DOCS_KEY)
   request.yar?.clear?.(DRAFT_DOCS_KEY)
   uploadedImages.clear()
-  clearFixedIssues(request, CHECK_ID)
+  request.yar?.clear?.(DECISIONS_KEY)
 }
 
 function postWhat(request, h) {
@@ -563,7 +580,16 @@ function getGuideDetail(request, h) {
         },
         created: formatGuideDate(guide.createdAt),
         updated: formatGuideDate(guide.updatedAt ?? guide.createdAt),
-        contextDocs: guide.contextDocs ?? []
+        contextDocs: guide.contextDocs ?? [],
+        // Read-only catalogue metadata, kept in a reveal so it does not repeat
+        // the status and dates shown above. The id is the guide's own; the rest
+        // are illustrative example values for the prototype.
+        metadata: {
+          id: guide.id,
+          type: 'Process guide',
+          tags: guide.scheme + ', eligibility, payments',
+          section: 'Whole guide'
+        }
       },
       editable: guide.owner === 'You',
       isPublished: guide.status === 'published',
@@ -984,6 +1010,37 @@ const DUPLICATE_MATCH = {
   title: 'Sustainable Farming Incentive actions guide'
 }
 
+// One update rarely affects just one guide. These are the guides this change is
+// likely to touch, each with the section most affected and how likely it is to
+// need updating (illustrative values).
+const AFFECTED_GUIDE_ROWS = [
+  { section: 'Eligibility', impact: 'High' },
+  { section: 'How to apply', impact: 'High' },
+  { section: 'Evidence you need to keep', impact: 'Medium' },
+  { section: 'Payment rates', impact: 'Medium' },
+  { section: 'Land and parcels', impact: 'Low' },
+  { section: 'Key dates and deadlines', impact: 'Low' },
+  { section: 'After you apply', impact: 'Low' }
+]
+
+// Rank order so the table always leads with the guides a change hits hardest.
+const IMPACT_RANK = { High: 0, Medium: 1, Low: 2 }
+
+function affectedGuides() {
+  return mockDocuments
+    .slice(0, 7)
+    .map((doc, index) => {
+      const row = AFFECTED_GUIDE_ROWS[index % AFFECTED_GUIDE_ROWS.length]
+      return {
+        title: doc.title,
+        section: row.section,
+        impact: row.impact,
+        href: '/guidance/library/' + doc.id
+      }
+    })
+    .sort((a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact])
+}
+
 function renderNeedExisting(h, errorMessage) {
   return h
     .view('guidance/need-existing', {
@@ -993,6 +1050,7 @@ function renderNeedExisting(h, errorMessage) {
       phase: phaseMeta('need'),
       backHref: '/guidance/need',
       match: DUPLICATE_MATCH,
+      affectedGuides: affectedGuides(),
       errorMessage
     })
     .code(statusCodes.ok)
@@ -1010,38 +1068,17 @@ function getNeedExisting(request, h) {
 }
 
 function postNeedExisting(request, h) {
-  const choice = request.payload?.choice
-  if (choice === 'update') {
-    // TODO: when the dedicated "update existing guidance" journey exists, route
-    // here into that journey, not the create-new draft flow. For now this
-    // switches to edit mode and lands on the hub, reusing the edit/diff machinery.
-    const guide =
-      mockDocuments.find((doc) => doc.id === DUPLICATE_MATCH.id) ??
-      DUPLICATE_MATCH
-    request.yar?.set(MODE_KEY, 'edit')
-    request.yar?.set(EDIT_GUIDE_KEY, { id: guide.id, title: guide.title })
-    request.yar?.set(BASELINE_KEY, sampleGuidanceMarkdown)
-    setPhaseStatus(request, 'need', 'done')
-    setFlash(request, 'You are now updating ' + guide.title + '.', true)
-    return h.redirect(HUB)
-  }
-  if (choice === 'new') {
-    // Genuinely new guidance, not an update: clear any edit state so the hub
-    // does not wrongly say "you are updating" the matched guide.
-    request.yar?.set(MODE_KEY, 'new')
-    request.yar?.clear?.(EDIT_GUIDE_KEY)
-    request.yar?.clear?.(BASELINE_KEY)
-    return h.redirect('/guidance/need/review')
-  }
-  return renderNeedExisting(h, 'Select what you want to do')
+  // The affected guides are shown for awareness only. Continuing always proceeds
+  // to make the guidance , a single forward step, not an update-or-new choice.
+  request.yar?.set(MODE_KEY, 'new')
+  request.yar?.clear?.(EDIT_GUIDE_KEY)
+  request.yar?.clear?.(BASELINE_KEY)
+  return h.redirect('/guidance/need/review')
 }
 
 // ── Phase 2: draft, upload the Word document ────────────────────────────────
-// The draft documents added on the upload screen (filenames only), and the
-// starter markdown used when the author begins from a blank guide instead.
+// The draft documents added on the upload screen (filenames only).
 const DRAFT_DOCS_KEY = 'guidanceDraftDocs'
-const BLANK_GUIDE_MARKDOWN =
-  '# New guide\n\n## About this guidance\n\nWrite the first section here.\n'
 
 function renderUpload(h, errorMessage, values) {
   return h
@@ -1107,13 +1144,19 @@ function postUpload(request, h) {
     })
   }
 
-  // Continue: start from a blank guide, or convert the uploaded documents.
+  // Continue: write the first draft with AI, or convert the uploaded documents.
   const method = payload.startMethod
-  if (method === 'blank') {
+  if (method === 'ai') {
+    // Fill the editor with a ready-made draft, framed as written from the
+    // ingested documents and the detected similar guidance.
     request.yar?.clear?.(DRAFT_DOCS_KEY)
-    request.yar?.set(MARKDOWN_KEY, BLANK_GUIDE_MARKDOWN)
-    request.yar?.set(FILENAME_KEY, 'Blank guide')
+    request.yar?.set(MARKDOWN_KEY, sampleGuidanceMarkdown)
+    request.yar?.set(FILENAME_KEY, 'AI first draft')
     request.yar?.clear?.(SECTIONS_KEY)
+    setFlash(
+      request,
+      'AI wrote a first draft from your briefing documents and similar guidance. Check every section and edit as needed.'
+    )
     return h.redirect('/guidance/sections')
   }
   if (method !== 'upload') {
@@ -1321,6 +1364,49 @@ function contentsFrom(sections) {
 // textarea with Write and Preview tabs and an inline formatting guide) copies
 // GOV.UK's own editors (Whitehall, Content Publisher). A collapsible contents
 // nav is added on top for navigating these very long RPA processing documents.
+// One guide shown in three states , the original Word document, the converted
+// markdown, and the published page , so people can see how a guide is made.
+// Static example content.
+const EXAMPLE_MARKDOWN = `## Check you are eligible
+
+You can apply if you:
+
+- manage at least 5 hectares of eligible land
+- have management control of the land for the whole agreement period
+
+## How to apply
+
+1. Sign in to the Rural Payments service.
+2. Select the actions you want to apply for.
+3. Check your answers and submit your application.
+`
+
+const EXAMPLE_WORD_HTML = `<h2>Check you are eligible</h2>
+<p>You can apply if you:</p>
+<ul>
+<li>manage at least 5 hectares of eligible land</li>
+<li>have management control of the land for the whole agreement period</li>
+</ul>
+<h2>How to apply</h2>
+<ol>
+<li>Sign in to the Rural Payments service.</li>
+<li>Select the actions you want to apply for.</li>
+<li>Check your answers and submit your application.</li>
+</ol>`
+
+function getExample(request, h) {
+  return h
+    .view('guidance/example', {
+      pageTitle: 'How a guide is made',
+      page: 'guidance',
+      backHref: '/guidance/converted',
+      wordHtml: EXAMPLE_WORD_HTML,
+      markdownText: EXAMPLE_MARKDOWN,
+      publishedHtml: renderMarkdown(EXAMPLE_MARKDOWN)
+    })
+    .code(statusCodes.ok)
+}
+
 function getGuideEditor(request, h) {
   const markdown = currentMarkdown(request)
   return h
@@ -1581,61 +1667,38 @@ function postTest(request, h) {
 
 // ── Phase 5: the AI pre-publish check (the worklist) ────────────────────────
 function getCheck(request, h) {
-  const result = mockAnalysisData
-  const findings = result.findings ?? []
-  const fixedIssues = getFixedIssues(request, CHECK_ID)
-  const remaining = countBlockersRemaining(findings, fixedIssues)
-  const state = remaining > 0 ? 'blocked' : 'cleared'
-  const mustFixItems = buildTaskItems(findings, fixedIssues, true)
+  const findings = mockAnalysisData.findings ?? []
+  const decisions = getDecisions(request)
+  const remaining = countBlockersRemaining(findings, decisions)
+  const mustFixItems = buildTaskItems(findings, decisions, true)
 
   return h
     .view('guidance/check', {
-      pageTitle: 'Pre-publish check',
+      pageTitle: 'Check before publishing',
       page: 'guidance',
       phase: phaseMeta('publish'),
       backHref: HUB,
-      state,
+      flash: takeFlash(request),
+      state: remaining > 0 ? 'blocked' : 'cleared',
       remaining,
-      fixedCount: mustFixItems.length - remaining,
+      reviewedCount: mustFixItems.length - remaining,
       mustFixTotal: mustFixItems.length,
       mustFixItems,
-      considerItems: buildTaskItems(findings, fixedIssues, false)
+      considerItems: buildTaskItems(findings, decisions, false)
     })
     .code(statusCodes.ok)
 }
 
-// Map a finding's section reference to the editor it should open. A finding that
-// names a real section deep-links to it; a document-wide finding opens the
-// section list. This gives the worklist a real route to the fix.
-function fixTargetForSection(request, sectionName) {
-  const sections = splitIntoSections(currentMarkdown(request))
-  const match = sections.find(
-    (section) =>
-      section.heading &&
-      sectionName &&
-      section.heading.toLowerCase() === sectionName.toLowerCase()
-  )
-  return match
-    ? { isSection: true, anchor: slugify(match.heading) }
-    : { isSection: false, anchor: '' }
-}
-
 function getCheckIssue(request, h) {
-  const result = mockAnalysisData
   const index = Number(request.params.index)
   const finding =
-    Number.isInteger(index) && index >= 0 ? result.findings?.[index] : undefined
+    Number.isInteger(index) && index >= 0
+      ? mockAnalysisData.findings?.[index]
+      : undefined
 
   if (!finding) {
     return h.redirect(CHECK_BASE)
   }
-
-  const fixTarget = fixTargetForSection(request, finding.section)
-  // Carry the issue index into the editor so saving returns here, and the anchor
-  // so the editor scrolls to that section in the preview.
-  const fixHref = fixTarget.isSection
-    ? `/guidance/sections?fix=${index}#${fixTarget.anchor}`
-    : '/guidance/sections'
 
   return h
     .view('guidance/check-issue', {
@@ -1644,15 +1707,12 @@ function getCheckIssue(request, h) {
       phase: phaseMeta('publish'),
       backHref: CHECK_BASE,
       issueIndex: index,
-      fixHref,
-      fixIsSection: fixTarget.isSection,
-      editedSection: request.query?.['fixed-section'] === '1',
       finding: {
         ...finding,
         sectionLabel: formatSection(finding.section),
         mustFix: isMustFix(finding.severity)
       },
-      fixed: getFixedIssues(request, CHECK_ID).has(index)
+      decision: getDecisions(request)[index] ?? null
     })
     .code(statusCodes.ok)
 }
@@ -1665,14 +1725,17 @@ function postCheckIssue(request, h) {
     return h.redirect(CHECK_BASE)
   }
 
-  setFixedIssue(request, CHECK_ID, index, request.payload?.fixed === 'true')
+  const decision = request.payload?.decision
+  if (decision === 'approved' || decision === 'rejected') {
+    setDecision(request, index, decision)
+  }
   return h.redirect(CHECK_BASE)
 }
 
 function getPublishConfirm(request, h) {
   const remaining = countBlockersRemaining(
     mockAnalysisData.findings ?? [],
-    getFixedIssues(request, CHECK_ID)
+    getDecisions(request)
   )
   if (remaining > 0) {
     return h.redirect(CHECK_BASE)
@@ -1691,7 +1754,7 @@ function getPublishConfirm(request, h) {
 function postPublish(request, h) {
   const remaining = countBlockersRemaining(
     mockAnalysisData.findings ?? [],
-    getFixedIssues(request, CHECK_ID)
+    getDecisions(request)
   )
   if (remaining > 0) {
     return h.redirect(CHECK_BASE)
@@ -1701,12 +1764,12 @@ function postPublish(request, h) {
   return h.redirect('/guidance/published')
 }
 
-// A convenience for the worklist: mark every essential (must-fix) issue as
-// fixed in one go, rather than opening each in turn.
+// A convenience for the worklist: approve every essential (must-fix) suggestion
+// in one go, rather than opening each in turn.
 function postCheckFixAll(request, h) {
   ;(mockAnalysisData.findings ?? []).forEach((finding, index) => {
     if (isMustFix(finding.severity)) {
-      setFixedIssue(request, CHECK_ID, index, true)
+      setDecision(request, index, 'approved')
     }
   })
   return h.redirect(CHECK_BASE)
@@ -1752,6 +1815,7 @@ export const getConvertedController = { handler: getConverted }
 export const getConfirmSectionsController = { handler: getConfirmSections }
 export const postConfirmSectionsController = { handler: postConfirmSections }
 export const getGuideEditorController = { handler: getGuideEditor }
+export const getExampleController = { handler: getExample }
 export const postGuideEditorController = { handler: postGuideEditor }
 export const getReviewController = { handler: getReview }
 export const postReviewController = { handler: postReview }

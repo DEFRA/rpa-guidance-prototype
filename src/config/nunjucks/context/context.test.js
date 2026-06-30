@@ -64,21 +64,6 @@ describe('context and cache', () => {
               current: true,
               text: 'Home',
               href: '/'
-            },
-            {
-              current: false,
-              text: 'Make and publish guidance',
-              href: '/guidance/start'
-            },
-            {
-              current: false,
-              text: 'Find and use guidance',
-              href: '/demand/sign-in'
-            },
-            {
-              current: false,
-              text: 'Find funding',
-              href: '/find-funding/start'
             }
           ],
           serviceName: 'Rural Payments Agency guidance',
@@ -163,21 +148,6 @@ describe('context and cache', () => {
               current: true,
               text: 'Home',
               href: '/'
-            },
-            {
-              current: false,
-              text: 'Make and publish guidance',
-              href: '/guidance/start'
-            },
-            {
-              current: false,
-              text: 'Find and use guidance',
-              href: '/demand/sign-in'
-            },
-            {
-              current: false,
-              text: 'Find funding',
-              href: '/find-funding/start'
             }
           ],
           serviceName: 'Rural Payments Agency guidance',
