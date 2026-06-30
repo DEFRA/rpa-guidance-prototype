@@ -24,7 +24,13 @@ const mockAnalysisData = {
       why_it_matters:
         'The procedure depends on dozens of references to other guides, for example the SITI Agri Basic Navigation guide. None are links, so an officer cannot follow a step without already knowing where each guide and section is.',
       recommendation:
-        'Make every reference to another guide or section a working link.'
+        'Make every reference to another guide or section a working link.',
+      suggestion: {
+        before:
+          'See the SITI Agri Basic Navigation guide for how to open the parcel.',
+        after:
+          'See the [SITI Agri Basic Navigation guide](/guidance/siti-agri-basic-navigation) for how to open the parcel.'
+      }
     },
     {
       category: 'Accessibility',
@@ -34,7 +40,12 @@ const mockAnalysisData = {
       why_it_matters:
         'The 14 screenshots are labelled only "system screen for this step". Officers using a screen reader, and the find-and-use assistant, cannot tell what each one shows, so those steps cannot be followed.',
       recommendation:
-        'Give each screenshot specific alt text describing what to look at and what to do on the screen.'
+        'Give each screenshot specific alt text describing what to look at and what to do on the screen.',
+      suggestion: {
+        before: 'Screenshot. Alt text: "system screen for this step".',
+        after:
+          'Screenshot. Alt text: "SITI Tenure screen with the Parcel ID field highlighted and no SBI linked".'
+      }
     },
     {
       category: 'Clarity',
@@ -44,7 +55,12 @@ const mockAnalysisData = {
       why_it_matters:
         'SBI, LPIS, JMS, CRM, PLCD, FRN, RLE1 and ORT appear without definition. A new processor, and the assistant answering a question, cannot reliably resolve them.',
       recommendation:
-        'Expand each acronym on first use, or add a short terms list at the top of the guide.'
+        'Expand each acronym on first use, or add a short terms list at the top of the guide.',
+      suggestion: {
+        before: 'Check the SBI in CRM against LPIS.',
+        after:
+          'Check the Single Business Identifier (SBI) in the Customer Relationship Management system (CRM) against the Land Parcel Identification System (LPIS).'
+      }
     },
     {
       category: 'Completeness',
@@ -54,7 +70,12 @@ const mockAnalysisData = {
       why_it_matters:
         'A few Yes and No branches end without telling the officer which section to go to next, so an investigation can stall mid-case.',
       recommendation:
-        'End every branch with an explicit next step or a link to the section that follows.'
+        'End every branch with an explicit next step or a link to the section that follows.',
+      suggestion: {
+        before: 'Is the parcel linked to the SBI? No.',
+        after:
+          'Is the parcel linked to the SBI? No, go to "Apply hold HOLD972".'
+      }
     },
     {
       category: 'Consistency',
@@ -64,7 +85,11 @@ const mockAnalysisData = {
       why_it_matters:
         'Some headings end in a full stop, for example "Check Old link.", and they mix title case with sentence case. This reads untidily and produces an inconsistent contents page.',
       recommendation:
-        'Use sentence case with no trailing full stop for every heading.'
+        'Use sentence case with no trailing full stop for every heading.',
+      suggestion: {
+        before: '## Check Old link.',
+        after: '## Check old link'
+      }
     },
     {
       category: 'Clarity',
@@ -74,7 +99,11 @@ const mockAnalysisData = {
       why_it_matters:
         'Branches refer to a "Learner check" section, but the heading is "Learner checks", so officers may not be sure they are in the right place.',
       recommendation:
-        'Make every in-text section reference match the actual heading exactly.'
+        'Make every in-text section reference match the actual heading exactly.',
+      suggestion: {
+        before: 'Go to the Learner check section.',
+        after: 'Go to the Learner checks section.'
+      }
     },
     {
       category: 'Consistency',
@@ -84,7 +113,12 @@ const mockAnalysisData = {
       why_it_matters:
         'HOLD972, HOLD963, HOLD925 and HOLD927 appear in different places with slightly different note wording, so an officer could apply the wrong note.',
       recommendation:
-        'Add one table of hold codes with their standard notes, and refer to it.'
+        'Add one table of hold codes with their standard notes, and refer to it.',
+      suggestion: {
+        before: 'Apply HOLD972 and add a note about the missing link.',
+        after:
+          'Apply HOLD972 (see Hold codes) and add the standard note for a missing parcel link.'
+      }
     }
   ],
   good_points: [

@@ -26,6 +26,7 @@ import {
   getConfirmSectionsController,
   postConfirmSectionsController,
   getGuideEditorController,
+  getExampleController,
   postGuideEditorController,
   getReviewController,
   postReviewController,
@@ -181,6 +182,11 @@ export const guidance = {
           method: 'GET',
           path: '/guidance/sections',
           ...getGuideEditorController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/example',
+          ...getExampleController
         },
         {
           method: 'POST',

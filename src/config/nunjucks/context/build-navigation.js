@@ -1,3 +1,6 @@
+// The service is scoped to making guidance, so the service navigation links
+// Home only. The demand and find-funding journeys still exist in the code but
+// are not linked from the nav.
 export function buildNavigation(request) {
   const path = request?.path ?? ''
   return [
@@ -5,21 +8,6 @@ export function buildNavigation(request) {
       text: 'Home',
       href: '/',
       current: path === '/'
-    },
-    {
-      text: 'Make and publish guidance',
-      href: '/guidance/start',
-      current: path.startsWith('/guidance')
-    },
-    {
-      text: 'Find and use guidance',
-      href: '/demand/sign-in',
-      current: path.startsWith('/demand')
-    },
-    {
-      text: 'Find funding',
-      href: '/find-funding/start',
-      current: path.startsWith('/find-funding')
     }
   ]
 }

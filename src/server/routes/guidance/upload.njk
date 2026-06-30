@@ -13,7 +13,7 @@
 
       <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
       <h1 class="govuk-heading-l">Start your draft</h1>
-      <p class="govuk-body">Upload your draft as Word documents and AI will convert them to text you can edit. Or start from a blank guide and write it here.</p>
+      <p class="govuk-body">Choose how to start. Either way, you review and edit everything before you publish.</p>
 
       {% if errorMessage %}
         {{ govukErrorSummary({
@@ -58,8 +58,13 @@
           fieldset: { legend: { text: "How do you want to start your draft?", classes: "govuk-fieldset__legend--m" } },
           errorMessage: { text: errorMessage } if errorMessage,
           items: [
-            { value: "upload", text: "Upload Word documents", checked: values.startMethod == "upload", conditional: { html: uploadHtml } },
-            { value: "blank", text: "Start from a blank guide", checked: values.startMethod == "blank" }
+            { value: "upload", text: "Upload Word documents", hint: { text: "AI converts them to text you can edit." }, checked: values.startMethod == "upload", conditional: { html: uploadHtml } },
+            {
+              value: "ai",
+              text: "Write the first draft with AI",
+              hint: { text: "Based on your briefing documents and similar guidance." },
+              checked: values.startMethod == "ai"
+            }
           ]
         }) }}
 

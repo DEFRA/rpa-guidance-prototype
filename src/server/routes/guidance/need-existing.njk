@@ -1,9 +1,7 @@
 {% extends 'layouts/page.njk' %}
 
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
-{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
 
 {% set page = 'guidance' %}
 
@@ -12,35 +10,35 @@
     <div class="govuk-grid-column-two-thirds">
 
       <span class="govuk-caption-l">Phase {{ phase.number }} of 5</span>
-      <h1 class="govuk-heading-l">This might already be covered by existing guidance</h1>
-      <p class="govuk-body">AI thinks your documents relate to guidance that is already published. Updating it avoids creating a duplicate.</p>
+      <h1 class="govuk-heading-l">Your guidance may affect published guides</h1>
+      <p class="govuk-body">AI found published guides that cover similar ground. Check the ones your change affects most, then continue to make your guidance.</p>
 
-      {% if errorMessage %}
-        {{ govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: [{ text: errorMessage, href: "#choice" }]
-        }) }}
-      {% endif %}
-
-      {% set matchHtml %}
-        Possible match: <strong>{{ match.title }}</strong><br>
-        <a class="govuk-link" href="/guidance/published/{{ match.id }}" target="_blank" rel="noopener noreferrer">View this guidance (opens in new tab)</a>
-      {% endset %}
-      {{ govukInsetText({ html: matchHtml }) }}
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-visually-hidden">Guides your update may affect</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Guide</th>
+            <th scope="col" class="govuk-table__header">Section affected</th>
+            <th scope="col" class="govuk-table__header">Impact</th>
+            <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for g in affectedGuides %}
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header govuk-!-font-weight-regular">{{ g.title }}</th>
+              <td class="govuk-table__cell">{{ g.section }}</td>
+              <td class="govuk-table__cell">
+                {% if g.impact == 'High' %}{{ govukTag({ text: "High", classes: "govuk-tag--red" }) }}{% elif g.impact == 'Medium' %}{{ govukTag({ text: "Medium", classes: "govuk-tag--orange" }) }}{% else %}{{ govukTag({ text: "Low", classes: "govuk-tag--grey" }) }}{% endif %}
+              </td>
+              <td class="govuk-table__cell"><a class="govuk-link" href="{{ g.href }}">View<span class="govuk-visually-hidden"> {{ g.title }}</span></a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
       <form method="post" action="/guidance/need/existing" novalidate>
-        {{ govukRadios({
-          name: "choice",
-          idPrefix: "choice",
-          fieldset: { legend: { text: "What do you want to do?", classes: "govuk-fieldset__legend--m" } },
-          errorMessage: { text: errorMessage } if errorMessage,
-          items: [
-            { value: "update", text: "Update " + match.title },
-            { value: "new", text: "This is new guidance" }
-          ]
-        }) }}
-
-        {{ govukButton({ text: "Continue" }) }}
+        {{ govukButton({ text: "Continue to make your guidance" }) }}
       </form>
 
     </div>

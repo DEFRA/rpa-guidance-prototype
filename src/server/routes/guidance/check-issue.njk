@@ -1,7 +1,7 @@
 {% extends 'layouts/page.njk' %}
 
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
 
 {% set page = 'guidance' %}
 
@@ -12,29 +12,44 @@
       <span class="govuk-caption-l">{{ finding.sectionLabel }}</span>
       <h1 class="govuk-heading-l">{{ finding.issue }}</h1>
 
-      {% if editedSection and not fixed %}
-        {{ govukNotificationBanner({ text: "You have edited the section. If that resolved this issue, mark it as fixed below." }) }}
-      {% endif %}
-
-      <p class="govuk-body">
-        {% if finding.mustFix %}You must fix this before publishing.{% else %}This is a suggested improvement.{% endif %}
-        {%- if fixed %} You have marked it as fixed.{% endif %}
+      <p class="govuk-!-margin-bottom-4">
+        {% if decision == 'approved' %}
+          {{ govukTag({ text: "Approved", classes: "govuk-tag--green" }) }}
+        {% elif decision == 'rejected' %}
+          {{ govukTag({ text: "Rejected", classes: "govuk-tag--grey" }) }}
+        {% else %}
+          {{ govukTag({ text: "To review", classes: "govuk-tag--red" if finding.mustFix else "govuk-tag--blue" }) }}
+        {% endif %}
       </p>
+
+      <p class="govuk-body">{% if finding.mustFix %}You must review this before publishing.{% else %}This is a suggested improvement.{% endif %}</p>
 
       <h2 class="govuk-heading-s">Why it matters</h2>
       <p class="govuk-body">{{ finding.why_it_matters }}</p>
 
-      <h2 class="govuk-heading-s">How to fix it</h2>
+      <h2 class="govuk-heading-s">Suggested rewrite</h2>
       <p class="govuk-body">{{ finding.recommendation }}</p>
 
-      {{ govukButton({ text: ("Fix this section" if fixIsSection else "Go to the guide sections"), href: fixHref }) }}
+      {% if finding.suggestion %}
+        <div class="app-rewrite">
+          <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1">Current</p>
+          <p class="app-rewrite__before">{{ finding.suggestion.before }}</p>
+          <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1">Suggested</p>
+          <p class="app-rewrite__after">{{ finding.suggestion.after }}</p>
+        </div>
+      {% endif %}
 
       <form method="post" action="/guidance/check/issues/{{ issueIndex }}" novalidate>
-        <input type="hidden" name="fixed" value="{{ 'false' if fixed else 'true' }}">
-        {{ govukButton({
-          text: "Mark as not fixed" if fixed else "Mark as fixed",
-          classes: "govuk-button--secondary" if fixed else ""
-        }) }}
+        <div class="govuk-button-group">
+          {% if decision == 'approved' %}
+            {{ govukButton({ text: "Reject instead", name: "decision", value: "rejected", classes: "govuk-button--secondary" }) }}
+          {% elif decision == 'rejected' %}
+            {{ govukButton({ text: "Approve instead", name: "decision", value: "approved" }) }}
+          {% else %}
+            {{ govukButton({ text: "Approve suggestion", name: "decision", value: "approved" }) }}
+            {{ govukButton({ text: "Reject", name: "decision", value: "rejected", classes: "govuk-button--secondary" }) }}
+          {% endif %}
+        </div>
       </form>
 
       <p class="govuk-body">

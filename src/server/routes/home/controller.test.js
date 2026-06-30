@@ -20,7 +20,7 @@ describe('#homeController', () => {
     })
 
     expect(result).toEqual(
-      expect.stringContaining('Make, find and use guidance |')
+      expect.stringContaining('Make and publish RPA guidance |')
     )
     expect(statusCode).toBe(statusCodes.ok)
   })

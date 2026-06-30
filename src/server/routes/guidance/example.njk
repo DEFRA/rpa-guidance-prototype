@@ -1,0 +1,38 @@
+{% extends 'layouts/page.njk' %}
+
+{% set pageTitle = 'How a guide is made' %}
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">How a guide is made</h1>
+      <p class="govuk-body">The same guide as it moves from a Word document, to converted markdown, to the published page. This example uses the "Check you are eligible" section.</p>
+
+      <div class="app-doc-states">
+
+        <div class="app-doc-states__step">
+          <h2 class="govuk-heading-m">1. Original Word document</h2>
+          <p class="govuk-body-s govuk-!-margin-bottom-2">What the author started with.</p>
+          <div class="app-doc-states__word">
+            <p class="app-doc-states__filename">check-eligibility.docx</p>
+            <div class="app-doc-states__word-body">{{ wordHtml | safe }}</div>
+          </div>
+        </div>
+
+        <div class="app-doc-states__step">
+          <h2 class="govuk-heading-m">2. Converted markdown</h2>
+          <p class="govuk-body-s govuk-!-margin-bottom-2">AI converts the document to markdown the author can edit.</p>
+          <pre class="app-doc-states__markdown"><code>{{ markdownText }}</code></pre>
+        </div>
+
+        <div class="app-doc-states__step">
+          <h2 class="govuk-heading-m">3. Published guide</h2>
+          <p class="govuk-body-s govuk-!-margin-bottom-2">How caseworkers and processors see it once it is published.</p>
+          <div class="app-doc-states__published">{{ publishedHtml | safe }}</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -3,6 +3,7 @@
 {% from "govuk/components/tag/macro.njk" import govukTag %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
@@ -38,6 +39,18 @@
           { key: { text: "Last updated" }, value: { text: guide.updated } }
         ]
       }) }}
+
+      {% set metadataHtml %}
+        {{ govukSummaryList({
+          rows: [
+            { key: { text: "ID" }, value: { text: guide.metadata.id } },
+            { key: { text: "Type" }, value: { text: guide.metadata.type } },
+            { key: { text: "Tags" }, value: { text: guide.metadata.tags } },
+            { key: { text: "Section" }, value: { text: guide.metadata.section } }
+          ]
+        }) }}
+      {% endset %}
+      {{ govukDetails({ summaryText: "Guide metadata", html: metadataHtml }) }}
 
       <h2 class="govuk-heading-m">Documents this guide was built from</h2>
       {% if guide.contextDocs.length %}

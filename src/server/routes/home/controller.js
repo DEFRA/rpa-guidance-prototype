@@ -1,35 +1,14 @@
-// The three ways into the service. Each is a separate, self-contained journey
-// through one part of the service blueprint. The audience line orients the
-// stakeholders who review this prototype.
-const entries = [
-  {
-    title: 'Make and publish guidance',
-    href: '/guidance/start',
-    description: 'Draft, review, test and publish a guide.',
-    audience: 'For policy, design, approval and publishing teams'
-  },
-  {
-    title: 'Find and use guidance',
-    href: '/demand/sign-in',
-    description: 'Answer a customer query using published guidance.',
-    audience: 'For contact centre and operational staff'
-  },
-  {
-    title: 'Find funding',
-    href: '/find-funding/start',
-    description: 'Find funding schemes for your land.',
-    audience: 'For farmers, land managers and their advisers'
-  }
-]
-
 /**
- * The service start page: choose one of the three journeys.
+ * The service start page (GOV.UK "start using a service" pattern): what the
+ * service does, who it is for, what you need, then a single Start now into the
+ * make journey. The demand and find-funding journeys still exist in the code
+ * but are not linked from here, because the service is scoped to making
+ * guidance.
  */
 export const homeController = {
   handler(_request, h) {
     return h.view('home/index', {
-      pageTitle: 'Make, find and use guidance',
-      entries
+      pageTitle: 'Make and publish RPA guidance'
     })
   }
 }

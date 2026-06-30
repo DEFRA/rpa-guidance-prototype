@@ -7,6 +7,12 @@
   padding-bottom: govuk-spacing(3);
 }
 
+// Match the page background to the footer, so on a short page the strip below
+// the footer reads as part of it rather than as a pale band.
+.govuk-template {
+  background-color: colours.$govuk-light-grey;
+}
+
 // Keep task-list status tags on one line so a long task title wraps instead of
 // the tag breaking across two lines (for example "To fix" becoming "To / fix").
 .govuk-task-list__status .govuk-tag {
