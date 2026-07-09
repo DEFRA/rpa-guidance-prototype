@@ -1,0 +1,15 @@
+{# Baseline viewer: the whole guide on one page. Works for any guidance type.
+   Uses: guide.title, bodyHtml. #}
+{% extends "guidance/viewers/_viewer-layout.njk" %}
+
+{% block viewer %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">{{ guide.type | capitalize }}</span>
+      <h1 class="govuk-heading-l">{{ guide.title }}</h1>
+      <div class="app-rich-text">
+        {{ bodyHtml | safe }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

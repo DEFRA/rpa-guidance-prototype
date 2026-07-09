@@ -42,7 +42,15 @@ import {
   getPublishConfirmController,
   postPublishController,
   postCheckFixAllController,
-  getPublishedController
+  getPublishedController,
+  getViewerGalleryController,
+  getViewerOpenController,
+  getTemplatesListController,
+  getTemplateNewController,
+  postTemplateNewController,
+  getTemplateEditController,
+  postTemplateEditController,
+  postTemplateDeleteController
 } from './controller.js'
 
 // Word documents are small, but leave generous headroom so a real .docx never
@@ -72,6 +80,46 @@ export const guidance = {
         { method: 'GET', path: '/guidance/what', ...getWhatController },
         { method: 'POST', path: '/guidance/what', ...postWhatController },
         { method: 'GET', path: '/guidance/library', ...getLibraryController },
+        {
+          method: 'GET',
+          path: '/guidance/viewer',
+          ...getViewerGalleryController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/viewer/open/{docId}',
+          ...getViewerOpenController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/viewer/templates',
+          ...getTemplatesListController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/viewer/templates/new',
+          ...getTemplateNewController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/viewer/templates/new',
+          ...postTemplateNewController
+        },
+        {
+          method: 'GET',
+          path: '/guidance/viewer/templates/{id}/edit',
+          ...getTemplateEditController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/viewer/templates/{id}/edit',
+          ...postTemplateEditController
+        },
+        {
+          method: 'POST',
+          path: '/guidance/viewer/templates/{id}/delete',
+          ...postTemplateDeleteController
+        },
         {
           method: 'GET',
           path: '/guidance/library/open/{id}',

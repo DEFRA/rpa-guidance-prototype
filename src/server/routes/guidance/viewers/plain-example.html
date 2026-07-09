@@ -1,0 +1,77 @@
+<!-- Plain-HTML viewer: a complete, standalone HTML page with inline CSS and no
+     GOV.UK layout. This is the zero-Nunjucks path — a designer who just wants to
+     write HTML can. The only dynamic bits are the {{ tokens }}, which are
+     substituted server-side. Works for any guidance type.
+     Uses: guide.title, guide.summary, bodyHtml. -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ guide.title }}</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Arial, sans-serif;
+        color: #0b0c0c;
+        margin: 0;
+        background: #f3f2f1;
+      }
+      .demo {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+        background: #ffffff;
+      }
+      .switch {
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+      }
+      .switch a {
+        color: #1d70b8;
+        margin-right: 0.75rem;
+      }
+      .switch a.current {
+        color: #0b0c0c;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .demo h1 {
+        font-size: 2.25rem;
+        line-height: 1.1;
+        color: #00703c;
+        border-bottom: 6px solid #00703c;
+        padding-bottom: 0.5rem;
+      }
+      .demo .summary {
+        font-size: 1.25rem;
+        color: #505a5f;
+      }
+      .demo h2 {
+        margin-top: 2rem;
+      }
+      .demo table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .demo th,
+      .demo td {
+        border: 1px solid #b1b4b6;
+        padding: 0.5rem;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <nav class="switch" aria-label="Switch template">
+        <a href="/guidance/viewer">← All guides</a>
+        {% for v in viewers %}
+          <a href="/guidance/viewer/open/{{ guide.id }}?viewer={{ v.id }}"{% if v.id == currentViewer %} class="current"{% endif %}>{{ v.label }}</a>
+        {% endfor %}
+      </nav>
+      <h1>{{ guide.title }}</h1>
+      {% if guide.summary %}<p class="summary">{{ guide.summary }}</p>{% endif %}
+      {{ bodyHtml | safe }}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{# The base most viewer templates extend. It gives you the standard app page
+   with GOV.UK styling and, above your content, the template switcher — so the
+   reader can flip between templates in place. Fill {% block viewer %} with your
+   content. A viewer does not have to use this — a template can be a standalone
+   HTML page with its own markup (see plain-example.html); such a page can still
+   include guidance/viewers/_switcher.njk to offer switching. #}
+{% extends "layouts/page.njk" %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  {% include "guidance/viewers/_switcher.njk" %}
+  {% block viewer %}{% endblock %}
+{% endblock %}

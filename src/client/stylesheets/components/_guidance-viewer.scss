@@ -1,0 +1,68 @@
+@use 'govuk-frontend' as *;
+@use '../variables/colours' as colours;
+
+// Chrome for the guidance viewer prototyping journey: the template switcher
+// shown above a viewer, and helpers for the template manager.
+
+.app-viewer-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(2);
+  margin-bottom: govuk-spacing(4);
+}
+
+.app-viewer-switcher__link {
+  display: inline-block;
+  padding: govuk-spacing(1) govuk-spacing(3);
+  border: 2px solid colours.$govuk-mid-grey;
+  background: colours.$govuk-white;
+  color: colours.$govuk-black;
+  text-decoration: none;
+
+  &:link,
+  &:visited {
+    color: colours.$govuk-black;
+  }
+
+  &:hover {
+    background: colours.$govuk-light-grey;
+  }
+}
+
+.app-viewer-switcher__link--current {
+  border-color: colours.$defra-green;
+  background: colours.$defra-green;
+  color: colours.$govuk-white;
+
+  &:link,
+  &:visited {
+    color: colours.$govuk-white;
+  }
+
+  &:hover {
+    background: colours.$defra-green;
+  }
+}
+
+// Keeps the "Delete" form on the same line as the Edit/Preview links in the
+// template manager table.
+.app-inline-form {
+  display: inline;
+}
+
+// A monospace editing area for template source.
+.app-code-editor {
+  font-family: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+  font-size: 0.875rem;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+// The "sections preview" viewer template reuses the guide editor's contents
+// nav + scrollable preview panel (markdown-editor.scss .app-markdown-preview),
+// but that height assumes the editor's Write/Preview tabs sit above it. Here
+// the switcher and guide heading sit above instead, so give it its own budget.
+.app-sections-preview {
+  height: calc(100vh - 18rem);
+}

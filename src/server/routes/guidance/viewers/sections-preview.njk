@@ -1,0 +1,41 @@
+{# Reuses the exact contents-nav + preview pattern from the make-journey's whole
+   guide editor (guidance/sections.njk): a sticky, collapsible contents list next
+   to a scrollable preview panel, with click-to-jump and scroll-tracking already
+   wired up by the existing app-guide-contents/app-contents-hide/app-contents-show
+   JS (src/client/javascripts/application.js) and markdown-editor.scss. That JS
+   already tolerates there being no paired textarea, so it works unmodified for a
+   read-only viewer.
+   Uses: guide.title, guide.type, contents, bodyHtml. #}
+{% extends "guidance/viewers/_viewer-layout.njk" %}
+
+{% block viewer %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <span class="govuk-caption-l">{{ guide.type | capitalize }}</span>
+      <h1 class="govuk-heading-l">{{ guide.title }}</h1>
+    </div>
+  </div>
+
+  <div class="app-guide-editor__layout">
+
+    <nav class="app-guide-editor__contents" id="guide-contents" aria-label="Guide contents" data-module="app-guide-contents">
+      <h2 class="govuk-heading-s app-guide-editor__contents-title">Contents</h2>
+      <button type="button" class="app-toggle" data-module="app-contents-hide" aria-expanded="true" aria-controls="guide-contents">Hide<span class="govuk-visually-hidden"> contents</span></button>
+      <ul class="govuk-list app-contents">
+        {% for item in contents %}
+          <li class="app-contents__item{% if item.level == 2 %} app-contents__item--sub{% elif item.level == 3 %} app-contents__item--sub2{% endif %}">
+            <a class="govuk-link app-contents__link" href="{{ item.href }}" data-heading="{{ item.text }}">{{ item.text }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="app-guide-editor__main">
+      <button type="button" class="app-toggle app-guide-editor__show-contents" data-module="app-contents-show" aria-expanded="false" aria-controls="guide-contents" hidden>Show contents</button>
+      <div class="app-markdown-preview app-sections-preview" data-module="app-markdown-preview" role="region" aria-label="Guide preview" tabindex="0">
+        {{ bodyHtml | safe }}
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

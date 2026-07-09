@@ -1,0 +1,28 @@
+{# Step-by-step task viewer: one step per screen with Previous/Next. Stepping is
+   server-driven via ?step=N, so it works with no JavaScript.
+   Uses: guide.title, step (title, html, stepIndex, totalSteps, isFirst, isLast,
+   prevHref, nextHref). #}
+{% extends "guidance/viewers/_viewer-layout.njk" %}
+
+{% block viewer %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">{{ guide.title }}</span>
+      <h1 class="govuk-heading-l">{{ step.title }}</h1>
+      <p class="govuk-body-s govuk-!-margin-bottom-6">Step {{ step.stepIndex + 1 }} of {{ step.totalSteps }}</p>
+
+      <div class="app-rich-text">
+        {{ step.html | safe }}
+      </div>
+
+      <nav class="govuk-button-group govuk-!-margin-top-8" aria-label="Step navigation">
+        {% if not step.isFirst %}
+          <a class="govuk-button govuk-button--secondary" href="{{ step.prevHref }}">Previous</a>
+        {% endif %}
+        {% if not step.isLast %}
+          <a class="govuk-button" href="{{ step.nextHref }}">Next step</a>
+        {% endif %}
+      </nav>
+    </div>
+  </div>
+{% endblock %}

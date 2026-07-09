@@ -1,0 +1,86 @@
+{% extends 'layouts/page.njk' %}
+
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorMessage %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                <li><a href="#body">{{ errorMessage }}</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <span class="govuk-caption-l">Viewer templates</span>
+      <h1 class="govuk-heading-l">{% if mode == 'edit' %}Edit template{% else %}Create a template{% endif %}</h1>
+
+      <form method="post" action="{% if mode == 'edit' %}/guidance/viewer/templates/{{ viewer.id }}/edit{% else %}/guidance/viewer/templates/new{% endif %}" novalidate>
+
+        {% if mode == 'edit' %}
+          <div class="govuk-form-group">
+            <span class="govuk-label">Name</span>
+            <p class="govuk-body"><strong>{{ values.name }}</strong> <code>.{{ values.ext }}</code></p>
+          </div>
+        {% else %}
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="name">Template name</label>
+            <div class="govuk-hint">Used as the file name and the label in the switcher, for example “Two column” or “Big steps”.</div>
+            <input class="govuk-input" id="name" name="name" type="text" value="{{ values.name }}">
+          </div>
+
+          <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset">
+              <legend class="govuk-fieldset__legend">Template type</legend>
+              <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+                <div class="govuk-radios__item">
+                  <input class="govuk-radios__input" id="ext-njk" name="ext" type="radio" value="njk" {% if values.ext != 'html' %}checked{% endif %}>
+                  <label class="govuk-label govuk-radios__label" for="ext-njk">Nunjucks (.njk)</label>
+                </div>
+                <div class="govuk-radios__item">
+                  <input class="govuk-radios__input" id="ext-html" name="ext" type="radio" value="html" {% if values.ext == 'html' %}checked{% endif %}>
+                  <label class="govuk-label govuk-radios__label" for="ext-html">Plain HTML (.html)</label>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        {% endif %}
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="body">Template</label>
+          <div class="govuk-hint">Write HTML and, if you like, Nunjucks tags. Inline <code>&lt;style&gt;</code> is allowed. Inline JavaScript is blocked.</div>
+          <textarea class="govuk-textarea app-code-editor" id="body" name="body" rows="22" spellcheck="false">{{ values.body }}</textarea>
+        </div>
+
+        <div class="govuk-button-group">
+          <button class="govuk-button" data-module="govuk-button">Save template</button>
+          <a class="govuk-link" href="/guidance/viewer/templates">Cancel</a>
+        </div>
+      </form>
+
+      <details class="govuk-details">
+        <summary class="govuk-details__summary"><span class="govuk-details__summary-text">What data can I use in a template?</span></summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body">Every template receives the same data about the chosen guide. Output HTML with <code>{{ '{{ ... | safe }}' }}</code>.</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li><code>guide.title</code>, <code>guide.type</code>, <code>guide.summary</code> — and any frontmatter field</li>
+            <li><code>bodyHtml</code> — the whole guide as HTML</li>
+            <li><code>lead</code> — the intro text before the first heading</li>
+            <li><code>sections</code> — list of <code>{ heading, level, id, html }</code></li>
+            <li><code>contents</code> — list of <code>{ text, level, href }</code> for a contents nav</li>
+            <li><code>steps</code> / <code>step</code> — the guide split into steps, for click-through (with <code>prevHref</code>, <code>nextHref</code>, <code>stepIndex</code>, <code>totalSteps</code>)</li>
+          </ul>
+          <p class="govuk-body">Extend <code>guidance/viewers/_viewer-layout.njk</code> for GOV.UK styling, or write a standalone HTML page. Full reference: <code>viewers/README.md</code>.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+{% endblock %}

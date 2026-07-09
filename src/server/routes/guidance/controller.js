@@ -11,6 +11,15 @@ import { mockAnalysisData } from './mock-analysis-data.js'
 import { mockDocuments } from './mock-documents-data.js'
 import { renderDiffHtml } from '#/common/diff.js'
 import { isMustFix, formatSection, severityRank } from './shared.js'
+import { listDocs, getDoc } from './viewer-content.js'
+import {
+  listViewers,
+  getViewer,
+  readViewerSource,
+  saveViewer,
+  deleteViewer
+} from './viewer-registry.js'
+import { buildViewerModel } from './viewer-model.js'
 
 // Session keys for the one document moving through the journey.
 const MARKDOWN_KEY = 'guidanceMarkdown'
@@ -661,6 +670,159 @@ function getPublishedGuide(request, h) {
       guideHtml
     })
     .code(statusCodes.ok)
+}
+
+// ── Viewer prototyping harness ──────────────────────────────────────────────
+// Lets designers try different guidance "viewer" presentations, switch between
+// them for a given guide, and author new ones from the browser — without
+// touching routing. Viewers live in ./viewers and content in ./content; both
+// are auto-discovered. See viewers/README.md.
+//
+// The journey: gallery (choose a guide) -> open (view it, switch template in
+// place) -> template manager (create/edit/delete templates). The chosen template
+// renders as the whole page; the shared _viewer-layout injects the switcher.
+
+// A starter template offered when creating a new Nunjucks viewer.
+const NEW_VIEWER_SCAFFOLD = `{% extends "guidance/viewers/_viewer-layout.njk" %}
+
+{% block viewer %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ guide.title }}</h1>
+      <div class="app-rich-text">
+        {{ bodyHtml | safe }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+`
+
+// The gallery: choose a guide to open in the viewer.
+function getViewerGallery(request, h) {
+  return h
+    .view('guidance/viewer-gallery', {
+      pageTitle: 'Guidance viewer prototypes',
+      page: 'guidance',
+      backHref: '/guidance/what',
+      docs: listDocs()
+    })
+    .code(statusCodes.ok)
+}
+
+// Open a guide in a viewer. The chosen template renders as the whole page; the
+// shared _viewer-layout injects a switcher so the reader can flip templates
+// in place (each switch is a normal page navigation, ?viewer=…). The switcher
+// data (viewers, currentViewer) is merged into the model so any template — even
+// a standalone one — can surface it.
+function getViewerOpen(request, h) {
+  const doc = getDoc(request.params.docId)
+  if (!doc) {
+    return h.redirect('/guidance/viewer')
+  }
+  const viewers = listViewers()
+  const requested = request.query.viewer
+  const currentViewer =
+    (getViewer(requested) && requested) ||
+    (getViewer(doc.defaultViewer) && doc.defaultViewer) ||
+    viewers[0]?.id
+  // No templates exist yet — send the designer to create one.
+  if (!currentViewer) {
+    return h.redirect('/guidance/viewer/templates')
+  }
+  const model = buildViewerModel(doc, currentViewer, request.query.step)
+  return h
+    .view(`guidance/viewers/${getViewer(currentViewer).file}`, {
+      ...model,
+      viewers,
+      currentViewer
+    })
+    .code(statusCodes.ok)
+}
+
+// ── Template manager: create/edit/delete viewer templates from the browser ───
+function getTemplatesList(request, h) {
+  const docs = listDocs()
+  return h
+    .view('guidance/viewer-templates', {
+      pageTitle: 'Viewer templates',
+      page: 'guidance',
+      backHref: '/guidance/viewer',
+      viewers: listViewers(),
+      previewDocId: docs[0]?.id,
+      saved: request.query.saved
+    })
+    .code(statusCodes.ok)
+}
+
+function renderEditor(h, options) {
+  return h
+    .view('guidance/viewer-template-editor', {
+      page: 'guidance',
+      backHref: '/guidance/viewer/templates',
+      ...options
+    })
+    .code(options.errorMessage ? statusCodes.badRequest : statusCodes.ok)
+}
+
+function getTemplateNew(request, h) {
+  return renderEditor(h, {
+    pageTitle: 'Create a template',
+    mode: 'new',
+    values: { name: '', ext: 'njk', body: NEW_VIEWER_SCAFFOLD }
+  })
+}
+
+function postTemplateNew(request, h) {
+  const { name, ext, body } = request.payload ?? {}
+  try {
+    const saved = saveViewer({ name, ext, body })
+    return h.redirect(`/guidance/viewer/templates?saved=${saved.id}`)
+  } catch (error) {
+    return renderEditor(h, {
+      pageTitle: 'Create a template',
+      mode: 'new',
+      errorMessage: error.message,
+      values: { name, ext: ext || 'njk', body }
+    })
+  }
+}
+
+function getTemplateEdit(request, h) {
+  const viewer = readViewerSource(request.params.id)
+  if (!viewer) {
+    return h.redirect('/guidance/viewer/templates')
+  }
+  return renderEditor(h, {
+    pageTitle: `Edit ${viewer.label}`,
+    mode: 'edit',
+    viewer,
+    values: { name: viewer.id, ext: viewer.ext, body: viewer.source }
+  })
+}
+
+function postTemplateEdit(request, h) {
+  const viewer = getViewer(request.params.id)
+  if (!viewer) {
+    return h.redirect('/guidance/viewer/templates')
+  }
+  const { body } = request.payload ?? {}
+  try {
+    saveViewer({ id: viewer.id, ext: viewer.ext, body })
+    return h.redirect(`/guidance/viewer/templates?saved=${viewer.id}`)
+  } catch (error) {
+    return renderEditor(h, {
+      pageTitle: `Edit ${viewer.label}`,
+      mode: 'edit',
+      viewer,
+      errorMessage: error.message,
+      values: { name: viewer.id, ext: viewer.ext, body }
+    })
+  }
+}
+
+function postTemplateDelete(request, h) {
+  deleteViewer(request.params.id)
+  return h.redirect('/guidance/viewer/templates')
 }
 
 // ── The hub: the five phases as a task list ─────────────────────────────────
@@ -1795,6 +1957,14 @@ export const getGuideDetailController = { handler: getGuideDetail }
 export const postRequestAccessController = { handler: postRequestAccess }
 export const getChangesController = { handler: getChanges }
 export const getPublishedGuideController = { handler: getPublishedGuide }
+export const getViewerGalleryController = { handler: getViewerGallery }
+export const getViewerOpenController = { handler: getViewerOpen }
+export const getTemplatesListController = { handler: getTemplatesList }
+export const getTemplateNewController = { handler: getTemplateNew }
+export const postTemplateNewController = { handler: postTemplateNew }
+export const getTemplateEditController = { handler: getTemplateEdit }
+export const postTemplateEditController = { handler: postTemplateEdit }
+export const postTemplateDeleteController = { handler: postTemplateDelete }
 export const getTaskListController = { handler: getTaskList }
 export const getNeedController = { handler: getNeed }
 export const postNeedUploadController = { handler: postNeedUpload }

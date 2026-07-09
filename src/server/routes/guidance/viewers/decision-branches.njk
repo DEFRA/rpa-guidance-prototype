@@ -1,0 +1,29 @@
+{# Decision-tree / branching viewer: each section is a collapsible panel so an
+   officer can open only the branch they are on. Uses native <details>, so it
+   needs no JavaScript.
+   Uses: guide.title, lead, sections (heading, html). #}
+{% extends "guidance/viewers/_viewer-layout.njk" %}
+
+{% block viewer %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">{{ guide.type | capitalize }}</span>
+      <h1 class="govuk-heading-l">{{ guide.title }}</h1>
+
+      {% if lead %}
+        <div class="app-rich-text govuk-!-margin-bottom-6">{{ lead | safe }}</div>
+      {% endif %}
+
+      {% for s in sections %}
+        <details class="govuk-details"{% if loop.first %} open{% endif %}>
+          <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text">{{ s.heading }}</span>
+          </summary>
+          <div class="govuk-details__text app-rich-text">
+            {{ s.html | safe }}
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{# The template switcher shown above a viewer. It renders inline as part of the
+   page (no iframe): each link is a normal navigation to the same guide in a
+   different template. Included by _viewer-layout.njk; a standalone template can
+   also {% include %} it. Needs guide, viewers and currentViewer in scope. #}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <span class="govuk-caption-m">Guidance viewer prototype</span>
+    <nav class="app-viewer-switcher" aria-label="Switch template">
+      {% for v in viewers %}
+        <a class="app-viewer-switcher__link{% if v.id == currentViewer %} app-viewer-switcher__link--current{% endif %}"
+           href="/guidance/viewer/open/{{ guide.id }}?viewer={{ v.id }}"
+           {% if v.id == currentViewer %}aria-current="true"{% endif %}>{{ v.label }}</a>
+      {% endfor %}
+    </nav>
+    <p class="govuk-body-s govuk-!-margin-bottom-6">
+      <a class="govuk-link" href="/guidance/viewer">All guides</a>
+      &nbsp;·&nbsp;
+      <a class="govuk-link" href="/guidance/viewer/templates">Manage templates</a>
+    </p>
+  </div>
+</div>

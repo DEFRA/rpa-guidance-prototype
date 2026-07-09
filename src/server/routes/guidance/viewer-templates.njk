@@ -1,0 +1,61 @@
+{% extends 'layouts/page.njk' %}
+
+{% set pageTitle = 'Viewer templates' %}
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if saved %}
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="saved-title" data-module="govuk-notification-banner">
+          <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title" id="saved-title">Success</h2>
+          </div>
+          <div class="govuk-notification-banner__content">
+            <p class="govuk-notification-banner__heading">Template “{{ saved }}” saved.</p>
+            <p class="govuk-body"><a class="govuk-link" href="/guidance/viewer/templates/{{ saved }}/edit">Keep editing</a></p>
+          </div>
+        </div>
+      {% endif %}
+
+      <span class="govuk-caption-l">Guidance viewer prototypes</span>
+      <h1 class="govuk-heading-l">Viewer templates</h1>
+      <p class="govuk-body">Create a new way to present guidance, or edit an existing one. Saved changes appear straight away — no restart needed.</p>
+
+      <p class="govuk-body">
+        <a class="govuk-button" href="/guidance/viewer/templates/new" role="button">Create new template</a>
+      </p>
+
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Template</th>
+            <th scope="col" class="govuk-table__header">Type</th>
+            <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for v in viewers %}
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell">{{ v.label }}</td>
+              <td class="govuk-table__cell"><code>.{{ v.ext }}</code></td>
+              <td class="govuk-table__cell">
+                {% if previewDocId %}
+                  <a class="govuk-link govuk-!-margin-right-2" href="/guidance/viewer/open/{{ previewDocId }}?viewer={{ v.id }}">Preview</a>
+                {% endif %}
+                <a class="govuk-link govuk-!-margin-right-2" href="/guidance/viewer/templates/{{ v.id }}/edit">Edit</a>
+                <form class="app-inline-form" method="post" action="/guidance/viewer/templates/{{ v.id }}/delete">
+                  <button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0 govuk-!-font-size-16" data-module="govuk-button">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <p class="govuk-body"><a class="govuk-link" href="/guidance/viewer">Back to guides</a></p>
+
+    </div>
+  </div>
+{% endblock %}

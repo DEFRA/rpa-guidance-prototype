@@ -1,0 +1,30 @@
+{% extends 'layouts/page.njk' %}
+
+{% set pageTitle = 'Guidance viewer prototypes' %}
+{% set page = 'guidance' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">Prototyping</span>
+      <h1 class="govuk-heading-l">Guidance viewer prototypes</h1>
+      <p class="govuk-body">Choose a guidance document to open it in the viewer. Once open, you can switch between templates to compare how the same guidance looks in each.</p>
+      <p class="govuk-body">
+        <a class="govuk-button govuk-button--secondary" href="/guidance/viewer/templates" role="button">Create or manage templates</a>
+      </p>
+
+      <ul class="govuk-list">
+        {% for doc in docs %}
+          <li class="govuk-!-margin-bottom-4">
+            <h2 class="govuk-heading-m govuk-!-margin-bottom-1">
+              <a class="govuk-link" href="/guidance/viewer/open/{{ doc.id }}">{{ doc.title }}</a>
+            </h2>
+            <p class="govuk-body-s govuk-!-margin-bottom-0"><strong>{{ doc.type | capitalize }}</strong>{% if doc.summary %} — {{ doc.summary }}{% endif %}</p>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <p class="govuk-body-s">To add a guide, drop a Markdown file in <code>content/</code>. To add a template, use <a class="govuk-link" href="/guidance/viewer/templates">Manage templates</a> or drop a file in <code>viewers/</code>. See <code>viewers/README.md</code>.</p>
+    </div>
+  </div>
+{% endblock %}

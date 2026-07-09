@@ -13,7 +13,10 @@ const nunjucksEnvironment = nunjucks.configure(
   [
     'node_modules/govuk-frontend/dist/',
     path.resolve(dirname, '../../server/common/templates'),
-    path.resolve(dirname, '../../server/common/components')
+    path.resolve(dirname, '../../server/common/components'),
+    // Lets templates under server/routes extend/include each other by path, e.g.
+    // the guidance viewer templates extending guidance/viewers/_viewer-layout.njk
+    path.resolve(dirname, '../../server/routes')
   ],
   {
     autoescape: true,
@@ -34,11 +37,24 @@ export const nunjucksConfig = {
           const template = nunjucks.compile(src, options.environment)
           return (ctx) => template.render(ctx)
         }
+      },
+      // Plain-HTML viewer templates (the guidance-prototyping harness) are
+      // compiled through the same Nunjucks environment, so a designer can write
+      // a .html file with {{ tokens }} and no Nunjucks knowledge.
+      html: {
+        compile(src, options) {
+          const template = nunjucks.compile(src, options.environment)
+          return (ctx) => template.render(ctx)
+        }
       }
     },
     compileOptions: {
       environment: nunjucksEnvironment
     },
+    // With more than one engine registered, Vision needs to know which extension
+    // to assume for view names given without one (every existing h.view call).
+    // Plain-HTML viewers are requested with their explicit .html filename.
+    defaultExtension: 'njk',
     relativeTo: path.resolve(dirname, '../..'),
     path: 'server/routes',
     isCached: config.get('isProduction'),

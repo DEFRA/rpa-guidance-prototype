@@ -1,0 +1,27 @@
+{# Reference / policy manual viewer: a side contents list that jumps to each
+   heading. Good for long documents officers dip into.
+   Uses: guide.title, contents, bodyHtml. #}
+{% extends "guidance/viewers/_viewer-layout.njk" %}
+
+{% block viewer %}
+  <h1 class="govuk-heading-l">{{ guide.title }}</h1>
+  {% if guide.summary %}<p class="govuk-body-l">{{ guide.summary }}</p>{% endif %}
+
+  <div class="govuk-grid-row">
+    <nav class="govuk-grid-column-one-third" aria-label="Contents">
+      <h2 class="govuk-heading-s">Contents</h2>
+      <ul class="govuk-list govuk-list--spaced govuk-!-font-size-16">
+        {% for item in contents %}
+          <li{% if item.level >= 3 %} class="govuk-!-padding-left-3"{% endif %}>
+            <a class="govuk-link govuk-link--no-visited-state" href="{{ item.href }}">{{ item.text }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    <div class="govuk-grid-column-two-thirds">
+      <div class="app-rich-text">
+        {{ bodyHtml | safe }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
